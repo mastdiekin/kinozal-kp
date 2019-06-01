@@ -8,4 +8,4 @@
 На странице http://kinozal.tv/top.php собирает данные о рейтинге по ссылкам фильмов.
 
 ## Как использовать?
-Установить index.js в [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
+Установить kinozal_kp.user.js в [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
