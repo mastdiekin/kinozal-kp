@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               Рейтинг кинопоиска для kinozal.tv
 // @namespace          https://github.com/mastdiekin/kinozal-kp
-// @description:ru     Рейтинг кинопоиска для kinozal.tv
+// @description:ru     Добавляет кнопку рейтинга kinopoisk'a, на странице http://kinozal.tv/top.php к раздачам.
 
 // @include            http://kinozal.tv/top.php*
 
