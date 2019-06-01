@@ -242,7 +242,9 @@
 
 	function createRatingNum(rating, element) {
 
-		element.srcElement.classList += ' static';
+		if(!element.srcElement.classList.contains('static')){
+			element.srcElement.classList += ' static';
+		}
 		element.srcElement.innerHTML = rating;
 		element.srcElement.title = props.readyText;
 
