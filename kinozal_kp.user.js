@@ -5,7 +5,7 @@
 
 // @include            http://kinozal.tv/top.php*
 
-// @version            1.0.1
+// @version            1.0.2
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
 // @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/kinozal_kp.user.js
