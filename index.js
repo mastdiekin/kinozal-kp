@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Рейтинг кинопоиска для kinozal.tv
-// @namespace   memmes
+// @namespace   https://github.com/mastdiekin/kinozal-kp
 // @description Рейтинг кинопоиска для kinozal.tv
 
 // @include     http://kinozal.tv/top.php*
@@ -8,6 +8,8 @@
 // @version     1.0
 // @author      mastdiekin
 // @require     https://cdn.jsdelivr.net/jquery/3.2.1/jquery.min.js
+// @updateURL   https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/index.js
+// @icon        http://kinozal.tv/pic/favicon.ico
 
 // @grant       GM_getValue
 // @grant       GM_setValue
