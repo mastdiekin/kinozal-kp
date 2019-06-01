@@ -8,7 +8,7 @@
 // @version            1.0
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
-// @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/index.js
+// @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/kinozal_kp.user.js
 // @icon               http://kinozal.tv/pic/favicon.ico
 
 // @grant              GM_getValue
