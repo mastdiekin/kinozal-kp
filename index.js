@@ -7,7 +7,7 @@
 
 // @version            1.0
 // @author             mastdiekin
-// @require            https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js
+// @require            http://code.jquery.com/jquery-3.2.1.min.js
 // @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/index.js
 // @icon               http://kinozal.tv/pic/favicon.ico
 
