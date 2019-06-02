@@ -5,7 +5,7 @@
 
 // @include            http://kinozal.tv/top.php*
 
-// @version            1.0.2
+// @version            1.0.3
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
 // @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/kinozal_kp.user.js
@@ -219,7 +219,7 @@
 
 					var kp_rating;
 
-					if(lastItemArr.querySelector('.floatright') === null) {
+					if(lastItemArr.querySelector('.floatright').length === null) {
 
 						kp_rating = 'n/a';
 
@@ -229,14 +229,13 @@
 
 					}
 
-					return createRatingNum(kp_rating, element);
-
 				} else {
 
 					kp_rating = 'error';
-					return createRatingNum(kp_rating, element);
 
 				}
+
+				return createRatingNum(kp_rating, element);
 
 			}
 		});
