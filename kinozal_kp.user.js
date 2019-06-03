@@ -219,7 +219,7 @@
 
 					var kp_rating;
 
-					if(lastItemArr.querySelector('.floatright') === null) {
+					if(lastItemArr.querySelector('.floatright').length === null) {
 
 						kp_rating = 'n/a';
 
