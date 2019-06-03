@@ -5,7 +5,7 @@
 
 // @include            http://kinozal.tv/top.php*
 
-// @version            1.0.3
+// @version            1.0.4
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
 // @updateURL          https://raw.githubusercontent.com/mastdiekin/kinozal-kp/master/kinozal_kp.user.js
@@ -219,7 +219,7 @@
 
 					var kp_rating;
 
-					if(lastItemArr.querySelector('.floatright').length === null) {
+					if(lastItemArr.querySelector('.floatright') === null) {
 
 						kp_rating = 'n/a';
 
