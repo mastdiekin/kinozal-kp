@@ -1,19 +1,20 @@
 // ==UserScript==
 // @name               Рейтинг кинопоиска для kinozal.tv
 // @namespace          https://github.com/mastdiekin/kinozal-kp
-// @description:ru     Добавляет кнопку рейтинга, на странице http://kinozal.tv/top.php к раздачам.
+// @description:ru     Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 
-// @include            http://kinozal.tv/top.php*
+// @include            http://kinozal.tv/*
 
-// @version            1.0.5
+// @version            1.0.6
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
+// @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js
 // @icon               http://kinozal.tv/pic/favicon.ico
 
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_xmlhttpRequest
-// @description Добавляет кнопку рейтинга, на странице http://kinozal.tv/top.php к раздачам.
+// @description Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 // ==/UserScript==
 
 (function() {
@@ -32,7 +33,8 @@
 	let styles = `
 
 	<style>
-	.element__rating-button {
+	.element__rating-button,
+	.element__rating-div{
 		display: block;
 		position: absolute;
 		bottom: 0;
@@ -50,6 +52,22 @@
 		opacity: 0;
 		transition: all ${props.transition};
 		overflow: hidden;
+	}
+	.element__rating-div {
+		opacity: 1;
+		cursor: default;
+		min-width: 50%;
+		min-height: 55px;
+		width: auto;
+		border-radius: 4px 0 0 0;
+		transform: translate(0, 0);
+		left: auto;
+		right: 0;
+		padding: 5px;
+		box-sizing: border-box;
+	}
+	.element__rating-div .element__preloder {
+		border-radius: 4px 0 0 0;
 	}
 	.element__rating-button:hover {
 		background-color: ${props._brand};
@@ -110,6 +128,14 @@
 		display: block;
 		text-align: center;
 	}
+	.tp1_a {
+		display: block;
+		float: left;
+		position: relative;
+	}
+	.tp1_desc > .tp1_a {
+		float: right;
+	}
 	@keyframes rotate {
 		from {
 			transform: rotate(0deg);
@@ -123,7 +149,7 @@
 	`;
 
 	$('body').prepend(styles);
-	$('.bx1 a').each(function(){
+	$('.mn1_content > .bx1.stable a').each(function(){
 		let th = $(this);
 		return createWrapper(th);
 	});
@@ -159,7 +185,12 @@
 
 	function requestPage(element, a) {
 
-		let url = element.srcElement.dataset.url;
+		let url;
+		if(element.srcElement !== undefined) {
+			url = element.srcElement.dataset.url;
+		} else {
+			url = element[0].dataset.url;
+		}
 
 		let data = GM_xmlhttpRequest({
 			method: 'GET',
@@ -173,45 +204,53 @@
 				if(response.status === 200) {
 
 					//включаем кнопку
-					element.srcElement.disabled = 0;
+					if(element.srcElement !== undefined) {
+						element.srcElement.disabled = 0;
+					}
 
 					//удаляем прелодер
-					a[0].children[1].remove();
-
-					let doc = response.responseText;
-					let html = new DOMParser().parseFromString(doc, "text/html");
-
-					let ul = html.querySelector(".men.w200");
-					let items = ul.getElementsByTagName("li");
-					let arr = [];
-					for (var i = 1; i < items.length; ++i) {
-						items[i].className += ' id-'+[i];
-
-						let kpSearch = items[i].innerHTML.match(/Кинопоиск|IMDb/m);
-
-						if(kpSearch) {
-							arr.push(kpSearch);
-						}
+					if(a[0] !== undefined) {
+						a[0].children[1].remove();
 					}
 
-					let imdb_rating, kp_rating;
-					let kp_matches = arr.filter(value => /^Кинопоиск/.test(value));
-					let imdb_matches = arr.filter(value => /^IMDb/.test(value));
-					if(imdb_matches[0]) {
-						imdb_rating = createRating(imdb_matches[0].input);
-					} else {
-						imdb_rating = 'n/a';
-					}
-					if(kp_matches[0]) {
-						kp_rating = createRating(kp_matches[0].input);
-					} else {
-						kp_rating = 'n/a';
-					}
-
-					return createRatingRender(kp_rating, imdb_rating, element);
+					requestPageResponse(element, a, response);
 				}
 			}
 		});
+	}
+
+	function requestPageResponse(element, a, response) {
+		let doc = response.responseText;
+		let html = new DOMParser().parseFromString(doc, "text/html");
+
+		let ul = html.querySelector(".men.w200");
+		let items = ul.getElementsByTagName("li");
+		let arr = [];
+		for (var i = 1; i < items.length; ++i) {
+			items[i].className += ' id-'+[i];
+
+			let kpSearch = items[i].innerHTML.match(/Кинопоиск|IMDb/m);
+
+			if(kpSearch) {
+				arr.push(kpSearch);
+			}
+		}
+
+		let imdb_rating, kp_rating;
+		let kp_matches = arr.filter(value => /^Кинопоиск/.test(value));
+		let imdb_matches = arr.filter(value => /^IMDb/.test(value));
+		if(imdb_matches[0]) {
+			imdb_rating = createRating(imdb_matches[0].input);
+		} else {
+			imdb_rating = 'n/a';
+		}
+		if(kp_matches[0]) {
+			kp_rating = createRating(kp_matches[0].input);
+		} else {
+			kp_rating = 'n/a';
+		}
+
+		return createRatingRender(kp_rating, imdb_rating, element);
 	}
 
 	function createRating(str) {
@@ -232,13 +271,55 @@
 	}
 
 	function createRatingRender(kp_rating, imdb_rating, element) {
-		if(!element.srcElement.classList.contains('static')){
-			element.srcElement.classList += ' static';
-		}
-		element.srcElement.innerHTML = `
+		let h = `
 			<span class="final__rating">КП: ${kp_rating}</span>
 			<span class="final__rating">IMDb: ${imdb_rating}</span>
-		`;
-		element.srcElement.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
+			`;
+		//для кнопки в топе
+		if(element.srcElement !== undefined) {
+			if(!element.srcElement.classList.contains('static')){
+				element.srcElement.classList += ' static';
+			}
+
+			element.srcElement.innerHTML = h;
+			element.srcElement.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
+		//для главной страницы (0-20)
+		} else {
+			if(!element.hasClass('static')) {
+				element.addClass('static');
+			}
+			$(element).html(h);
+		}
 	}
+
+	function createMainPageRatingsElement() {
+		$('.tp1_body').each(function(){
+			let img = $(this).find('.tp1_img');
+			let a = img.parent();
+			img.after(`<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
+			a.find('.element__rating-div').attr('data-url', a.attr('href'))
+		});
+	}
+	createMainPageRatingsElement();
+
+	function mainPageRatings() {
+		//call func when user has an item in sight (https://github.com/imakewebthings/waypoints)
+		$('.tp1_border > .tp1_body').each(function() {
+			let self = $(this);
+			let a = self.find('a');
+			let element = a.find('.element__rating-div');
+			a.addClass('tp1_a');
+			const waypoint = new Waypoint({
+				element: self[0],
+				handler(direction) {
+					const th = this;
+					requestPage(element, a[0]);
+					self.addClass('__init');
+					th.destroy();
+				}, offset: '80%'
+			});
+		});
+	}
+	mainPageRatings();
+
 })();
