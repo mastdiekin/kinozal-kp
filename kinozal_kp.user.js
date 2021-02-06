@@ -3,9 +3,12 @@
 // @namespace          https://github.com/mastdiekin/kinozal-kp
 // @description:ru     Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 
-// @include            http://kinozal.tv/*
+// @include            *kinozal.tv/*
+// @include            *kinozal-tv.appspot.com/*
+// @include            *kinozal.me/*
+// @include            *kinozal.guru/*
 
-// @version            1.0.6
+// @version            1.0.7
 // @author             mastdiekin
 // @require            http://code.jquery.com/jquery-3.2.1.min.js
 // @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js
@@ -14,8 +17,17 @@
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_xmlhttpRequest
+// @grant              GM_addStyle
 // @description Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 // ==/UserScript==
+
+/*=======================================================
+  Repository
+=======================================================
+
+  https://github.com/mastdiekin/kinozal-kp
+
+*/
 
 (function() {
 	'use strict';
@@ -31,8 +43,6 @@
 	let base64svg = `PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA3MCA3MCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNzAgNzAiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTM1IDBjLTE5LjMgMC0zNSAxNS43LTM1IDM1czE1LjcgMzUgMzUgMzUgMzUtMTUuNyAzNS0zNS0xNS43LTM1LTM1LTM1em0tMTMuMyAxMy41YzQuNyAwIDguNCAzLjcgOC40IDguNHMtMy43IDguNC04LjQgOC40LTguNC0zLjctOC40LTguNGMwLjEtNC43IDMuOC04LjQgOC40LTguNHptMCA0M2MtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em05LjctMTcuOWMtMi0yLTItNS4zIDAtNy4zczUuMy0yIDcuMyAwIDIgNS4zIDAgNy4zLTUuMyAyLjEtNy4zIDB6bTE2LjkgMTcuOWMtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em0wLTI2LjRjLTQuNyAwLTguNC0zLjctOC40LTguNHMzLjctOC40IDguNC04LjQgOC40IDMuNyA4LjQgOC40Yy0wLjEgNC43LTMuOCA4LjQtOC40IDguNHoiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=`;
 
 	let styles = `
-
-	<style>
 	.element__rating-button,
 	.element__rating-div{
 		display: block;
@@ -144,11 +154,9 @@
 			transform: rotate(360deg);
 		}
 	}
-	</style>
-
 	`;
+	GM_addStyle(styles);
 
-	$('body').prepend(styles);
 	$('.mn1_content > .bx1.stable a').each(function(){
 		let th = $(this);
 		return createWrapper(th);
