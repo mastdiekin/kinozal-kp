@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name               Рейтинг кинопоиска для kinozal.tv
 // @namespace          https://github.com/mastdiekin/kinozal-kp
-// @description:ru     Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
+// @description Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 
 // @include            *kinozal.tv/*
 // @include            *kinozal-tv.appspot.com/*
@@ -18,7 +18,6 @@
 // @grant              GM_setValue
 // @grant              GM_xmlhttpRequest
 // @grant              GM_addStyle
-// @description Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 // ==/UserScript==
 
 /*=======================================================
