@@ -30,17 +30,18 @@
 
 const showMainPageRatingEnable = true; //показывает рейтинг у раздач на гллавной сайта
 const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
+const reGetRating = false; //отключает повторное нажатие на пнопку "Рейтинг"
 
-(function() {
-	'use strict';
+(function () {
+	"use strict";
 
 	const props = {
-		_brand: '#f1d29c',
-		brand: '#C0A067',
-		transition: '.1s ease',
-		buttonText: 'Рейтинг',
-		requestText: 'Получить рейтинг',
-	}
+		_brand: "#f1d29c",
+		brand: "#C0A067",
+		transition: ".1s ease",
+		buttonText: "Рейтинг",
+		requestText: "Получить рейтинг",
+	};
 
 	const svg = `<svg enable-background="new 0 0 70 70" version="1.1" viewBox="0 0 70 70" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="m35 0c-19.3 0-35 15.7-35 35s15.7 35 35 35 35-15.7 35-35-15.7-35-35-35zm-13.3 13.5c4.7 0 8.4 3.7 8.4 8.4s-3.7 8.4-8.4 8.4-8.4-3.7-8.4-8.4c0.1-4.7 3.8-8.4 8.4-8.4zm0 43c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm9.7-17.9c-2-2-2-5.3 0-7.3s5.3-2 7.3 0 2 5.3 0 7.3-5.3 2.1-7.3 0zm16.9 17.9c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm0-26.4c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4z" fill="#ffffff"/></svg>`;
 	const base64svg = `PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA3MCA3MCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNzAgNzAiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTM1IDBjLTE5LjMgMC0zNSAxNS43LTM1IDM1czE1LjcgMzUgMzUgMzUgMzUtMTUuNyAzNS0zNS0xNS43LTM1LTM1LTM1em0tMTMuMyAxMy41YzQuNyAwIDguNCAzLjcgOC40IDguNHMtMy43IDguNC04LjQgOC40LTguNC0zLjctOC40LTguNGMwLjEtNC43IDMuOC04LjQgOC40LTguNHptMCA0M2MtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em05LjctMTcuOWMtMi0yLTItNS4zIDAtNy4zczUuMy0yIDcuMyAwIDIgNS4zIDAgNy4zLTUuMyAyLjEtNy4zIDB6bTE2LjkgMTcuOWMtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em0wLTI2LjRjLTQuNyAwLTguNC0zLjctOC40LTguNHMzLjctOC40IDguNC04LjQgOC40IDMuNyA4LjQgOC40Yy0wLjEgNC43LTMuOCA4LjQtOC40IDguNHoiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=`;
@@ -174,72 +175,68 @@ const showTopPageRatingEnable = true; //добавляет кнопку "Рей�
 	GM_addStyle(styles);
 
 	function wrap(toWrap, wrapper) {
-		wrapper = wrapper || document.createElement('div');
+		wrapper = wrapper || document.createElement("div");
 		toWrap.parentNode.appendChild(wrapper);
-		wrapper.classList += 'element__wrapper';
+		wrapper.classList += "element__wrapper";
 		return wrapper.appendChild(toWrap);
-	};
+	}
 
-
-	function createWrapper(element) {
-		const content = [...document.querySelectorAll('.mn1_content > .bx1.stable a')];
-		content.map(a => {
+	function createWrapper() {
+		const content = [...document.querySelectorAll(".mn1_content > .bx1.stable a")];
+		content.map((a) => {
 			wrap(a);
 			createButton(a);
 		});
 	}
 
 	function createButton(a) {
-		let button = document.createElement('button');
-		button.className = 'element__rating-button';
-		button.id = 'rating';
+		let button = document.createElement("button");
+		button.className = "element__rating-button";
+		button.id = "rating";
 		button.innerHTML += props.buttonText;
 		button.dataset.url = a.href;
-		button.setAttribute('title', props.requestText);
+		button.setAttribute("title", props.requestText);
 		a.parentNode.appendChild(button);
-		button.addEventListener('click', function(button){
-			if(!this.classList.contains('static')) {
+		button.addEventListener("click", function (e) {
+			if (!this.classList.contains("static") || reGetRating) {
 				//отключаем кнопку
-				button.srcElement.disabled = 1;
-				let preloader = document.createElement('div');
-				preloader.className = 'element__preloader';
+				e.target.disabled = true;
+				let preloader = document.createElement("div");
+				preloader.className = "element__preloader";
 				preloader.innerHTML += svg;
 				a.innerHTML += preloader.outerHTML;
-
-				return requestPage(button.target, a);
+				return requestPage(e.target, a);
 			}
-		})
-
+		});
 	}
 
 	function requestPage(element, a) {
-
+		//проверим не кликнуто ли на span с рейтингом и получим именно кнопку.
+		element = element.dataset.url ? element : element.parentElement;
 		const url = element.dataset.url;
 
 		const data = GM_xmlhttpRequest({
-			method: 'GET',
+			method: "GET",
 			url,
 			headers: {
-				'User-Agent': 'Mozilla/5.0',
-				'Accept': 'text/xml'
+				"User-Agent": "Mozilla/5.0",
+				Accept: "text/xml",
 			},
 			onload: function (response) {
 				//включаем кнопку
-				if(element.srcElement !== undefined) {
-					element.srcElement.disabled = 0;
-				}
+				if (element !== undefined) element.disabled = false;
 
 				//удаляем прелодер
-				if(a !== undefined) {
-					if(a.children[1].classList.contains('element__preloader')){
+				if (a !== undefined) {
+					if (a.children[1].classList.contains("element__preloader")) {
 						a.children[1].remove();
 					}
 				}
 
-				if(response.status === 200) {
+				if (response.status === 200) {
 					requestPageResponse(element, a, response);
 				}
-			}
+			},
 		});
 	}
 
@@ -251,17 +248,17 @@ const showTopPageRatingEnable = true; //добавляет кнопку "Рей�
 		let items = ul.getElementsByTagName("li");
 		let arr = [];
 		for (var i = 1; i < items.length; ++i) {
-			items[i].className += ' id-'+[i];
+			items[i].className += " id-" + [i];
 			let kpSearch = items[i].innerHTML.match(/Кинопоиск|IMDb/m);
 			kpSearch && arr.push(kpSearch);
 		}
 
 		let imdb_rating, kp_rating;
-		let kp_matches = arr.filter(value => /^Кинопоиск/.test(value));
-		let imdb_matches = arr.filter(value => /^IMDb/.test(value));
+		let kp_matches = arr.filter((value) => /^Кинопоиск/.test(value));
+		let imdb_matches = arr.filter((value) => /^IMDb/.test(value));
 
-		imdb_rating = imdb_matches[0] ? createRating(imdb_matches[0].input) : 'n/a';
-		kp_rating = kp_matches[0] ? createRating(kp_matches[0].input) : 'n/a';
+		imdb_rating = imdb_matches[0] ? createRating(imdb_matches[0].input) : "n/a";
+		kp_rating = kp_matches[0] ? createRating(kp_matches[0].input) : "n/a";
 
 		return createRatingRender(kp_rating, imdb_rating, element);
 	}
@@ -276,11 +273,8 @@ const showTopPageRatingEnable = true; //добавляет кнопку "Рей�
 			}
 			arr.push(m);
 		}
-		if(arr.length > 0 && arr[0][1]) {
-			return arr[0][1]; //rating num (ex. 6.9)
-		}
 
-		return '—';
+		return arr.length > 0 && arr[0][1] ? arr[0][1] : "-";
 	}
 
 	function createRatingRender(kp_rating, imdb_rating, element) {
@@ -288,19 +282,19 @@ const showTopPageRatingEnable = true; //добавляет кнопку "Рей�
 			<span class="final__rating">КП: ${kp_rating}</span>
 			<span class="final__rating">IMDb: ${imdb_rating}</span>
 			`;
-		if(!element.classList.contains('static')) {
-			element.classList += ' static';
+		if (!element.classList.contains("static")) {
+			element.classList += " static";
 		}
 		element.innerHTML = h;
 		element.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
 	}
 
 	function createMainPageRatingsElement() {
-		const tpBody = [...document.querySelectorAll('.tp1_body')];
-		tpBody.map(el => {
+		const tpBody = [...document.querySelectorAll(".tp1_body")];
+		tpBody.map((el) => {
 			const a = el.children[0];
 			const img = a.children[0];
-			img.insertAdjacentHTML('afterend', `<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
+			img.insertAdjacentHTML("afterend", `<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
 			const div = a.children[1];
 			div.dataset.url = a.getAttribute("href");
 		});
@@ -308,36 +302,36 @@ const showTopPageRatingEnable = true; //добавляет кнопку "Рей�
 
 	function mainPageRatings() {
 		//call func when user has an item in sight (https://github.com/imakewebthings/waypoints)
-		const waypoints = [...document.querySelectorAll('.tp1_border > .tp1_body')];
-		waypoints.map(el => {
+		const waypoints = [...document.querySelectorAll(".tp1_border > .tp1_body")];
+		waypoints.map((el) => {
 			const self = el;
 			const a = el.children[0];
 			const element = a.children[1];
 
-			a.classList += ' tp1_a';
+			a.classList += " tp1_a";
 
 			const waypoint = new Waypoint({
 				element: self,
 				handler(direction) {
 					const th = this;
 					requestPage(element, a);
-					self.classList += ' __init';
+					self.classList += " __init";
 					th.destroy();
-				}, offset: '80%'
+				},
+				offset: "80%",
 			});
 		});
 	}
 
 	//INIT
 	(function init() {
-		if(showTopPageRatingEnable) {
+		if (showTopPageRatingEnable) {
 			createWrapper();
 		}
 
-		if(showMainPageRatingEnable) {
+		if (showMainPageRatingEnable) {
 			createMainPageRatingsElement();
 			mainPageRatings();
 		}
 	})();
-
 })();
