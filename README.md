@@ -13,6 +13,11 @@
 Установить kinozal_kp.user.js в [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
 
 ### Обновления
+v1.0.8 (-)
+- Убрано jQuery
+- Убран лишний код
+- Небольшие изменения в верстке
+
 v1.0.7 (06.02.2021)
 - Добавлено зеркало kinozal-tv.appspot.com
 - Добавлено зеркало kinozal.me

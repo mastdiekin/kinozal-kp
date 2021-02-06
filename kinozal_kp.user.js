@@ -1,23 +1,23 @@
 // ==UserScript==
 // @name               Рейтинг кинопоиска для kinozal.tv
 // @namespace          https://github.com/mastdiekin/kinozal-kp
-// @description Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
+// @description        Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 
 // @include            *kinozal.tv/*
 // @include            *kinozal-tv.appspot.com/*
 // @include            *kinozal.me/*
 // @include            *kinozal.guru/*
 
-// @version            1.0.7
+// @version            1.0.8
 // @author             mastdiekin
-// @require            http://code.jquery.com/jquery-3.2.1.min.js
-// @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js
+// @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js
 // @icon               http://kinozal.tv/pic/favicon.ico
 
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_xmlhttpRequest
 // @grant              GM_addStyle
+
 // ==/UserScript==
 
 /*=======================================================
@@ -28,9 +28,13 @@
 
 */
 
+const showMainPageRatingEnable = true; //показывает рейтинг у раздач на гллавной сайта
+const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
+
 (function() {
 	'use strict';
-	let props = {
+
+	const props = {
 		_brand: '#f1d29c',
 		brand: '#C0A067',
 		transition: '.1s ease',
@@ -38,21 +42,20 @@
 		requestText: 'Получить рейтинг',
 	}
 
-	let svg = `<svg enable-background="new 0 0 70 70" version="1.1" viewBox="0 0 70 70" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="m35 0c-19.3 0-35 15.7-35 35s15.7 35 35 35 35-15.7 35-35-15.7-35-35-35zm-13.3 13.5c4.7 0 8.4 3.7 8.4 8.4s-3.7 8.4-8.4 8.4-8.4-3.7-8.4-8.4c0.1-4.7 3.8-8.4 8.4-8.4zm0 43c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm9.7-17.9c-2-2-2-5.3 0-7.3s5.3-2 7.3 0 2 5.3 0 7.3-5.3 2.1-7.3 0zm16.9 17.9c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm0-26.4c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4z" fill="#ffffff"/></svg>`;
-	let base64svg = `PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA3MCA3MCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNzAgNzAiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTM1IDBjLTE5LjMgMC0zNSAxNS43LTM1IDM1czE1LjcgMzUgMzUgMzUgMzUtMTUuNyAzNS0zNS0xNS43LTM1LTM1LTM1em0tMTMuMyAxMy41YzQuNyAwIDguNCAzLjcgOC40IDguNHMtMy43IDguNC04LjQgOC40LTguNC0zLjctOC40LTguNGMwLjEtNC43IDMuOC04LjQgOC40LTguNHptMCA0M2MtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em05LjctMTcuOWMtMi0yLTItNS4zIDAtNy4zczUuMy0yIDcuMyAwIDIgNS4zIDAgNy4zLTUuMyAyLjEtNy4zIDB6bTE2LjkgMTcuOWMtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em0wLTI2LjRjLTQuNyAwLTguNC0zLjctOC40LTguNHMzLjctOC40IDguNC04LjQgOC40IDMuNyA4LjQgOC40Yy0wLjEgNC43LTMuOCA4LjQtOC40IDguNHoiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=`;
+	const svg = `<svg enable-background="new 0 0 70 70" version="1.1" viewBox="0 0 70 70" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="m35 0c-19.3 0-35 15.7-35 35s15.7 35 35 35 35-15.7 35-35-15.7-35-35-35zm-13.3 13.5c4.7 0 8.4 3.7 8.4 8.4s-3.7 8.4-8.4 8.4-8.4-3.7-8.4-8.4c0.1-4.7 3.8-8.4 8.4-8.4zm0 43c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm9.7-17.9c-2-2-2-5.3 0-7.3s5.3-2 7.3 0 2 5.3 0 7.3-5.3 2.1-7.3 0zm16.9 17.9c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm0-26.4c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4z" fill="#ffffff"/></svg>`;
+	const base64svg = `PHN2ZyBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA3MCA3MCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgNzAgNzAiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0ibTM1IDBjLTE5LjMgMC0zNSAxNS43LTM1IDM1czE1LjcgMzUgMzUgMzUgMzUtMTUuNyAzNS0zNS0xNS43LTM1LTM1LTM1em0tMTMuMyAxMy41YzQuNyAwIDguNCAzLjcgOC40IDguNHMtMy43IDguNC04LjQgOC40LTguNC0zLjctOC40LTguNGMwLjEtNC43IDMuOC04LjQgOC40LTguNHptMCA0M2MtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em05LjctMTcuOWMtMi0yLTItNS4zIDAtNy4zczUuMy0yIDcuMyAwIDIgNS4zIDAgNy4zLTUuMyAyLjEtNy4zIDB6bTE2LjkgMTcuOWMtNC43IDAtOC40LTMuNy04LjQtOC40czMuNy04LjQgOC40LTguNCA4LjQgMy43IDguNCA4LjRjLTAuMSA0LjctMy44IDguNC04LjQgOC40em0wLTI2LjRjLTQuNyAwLTguNC0zLjctOC40LTguNHMzLjctOC40IDguNC04LjQgOC40IDMuNyA4LjQgOC40Yy0wLjEgNC43LTMuOCA4LjQtOC40IDguNHoiIGZpbGw9IiNmZmZmZmYiLz48L3N2Zz4=`;
 
-	let styles = `
+	const styles = `
 	.element__rating-button,
 	.element__rating-div{
 		display: block;
 		position: absolute;
 		bottom: 0;
 		font-size: 12px;
-		left: 50%;
+		left: 0;
 		width: 100%;
 		box-sizing: border-box;
 		line-height: 25px;
-		transform: translate(-50%, 0);
 		background-color: ${props.brand};
 		border: 0;
 		color: #fff;
@@ -82,12 +85,15 @@
 		background-color: ${props._brand};
 	}
 	.element__wrapper {
-		display: inline-block;
+		display: block;
+		float: left;
+		margin: 0 5px 5px 0;
 		position: relative;
-		*zoom: 1
+		*zoom: 1;
 	}
 	.element__wrapper a {
 		position: relative;
+		display: block;
 		margin: 0 !important;
 	}
 	.element__wrapper:hover > .element__rating-button {
@@ -145,6 +151,10 @@
 	.tp1_desc > .tp1_a {
 		float: right;
 	}
+	.stable a img {
+		width: 107px;
+		height: 157px
+	}
 	@keyframes rotate {
 		from {
 			transform: rotate(0deg);
@@ -154,26 +164,39 @@
 		}
 	}
 	`;
+	const disabledStyles = `
+	.stable a {
+		float: none;
+	}
+	`;
+
+	showTopPageRatingEnable && GM_addStyle(disabledStyles); //стили при выключенном рейтинге в /top.php
 	GM_addStyle(styles);
 
-	$('.mn1_content > .bx1.stable a').each(function(){
-		let th = $(this);
-		return createWrapper(th);
-	});
+	function wrap(toWrap, wrapper) {
+		wrapper = wrapper || document.createElement('div');
+		toWrap.parentNode.appendChild(wrapper);
+		wrapper.classList += 'element__wrapper';
+		return wrapper.appendChild(toWrap);
+	};
+
+
 	function createWrapper(element) {
-		element.wrap( "<div class='element__wrapper'></div>" );
-		return createButton(element);
+		const content = [...document.querySelectorAll('.mn1_content > .bx1.stable a')];
+		content.map(a => {
+			wrap(a);
+			createButton(a);
+		});
 	}
 
-	function createButton(element) {
-
+	function createButton(a) {
 		let button = document.createElement('button');
 		button.className = 'element__rating-button';
 		button.id = 'rating';
 		button.innerHTML += props.buttonText;
-		button.dataset.url = element[0]['href'];
+		button.dataset.url = a.href;
 		button.setAttribute('title', props.requestText);
-		element.parent().append(button);
+		a.parentNode.appendChild(button);
 		button.addEventListener('click', function(button){
 			if(!this.classList.contains('static')) {
 				//отключаем кнопку
@@ -181,10 +204,9 @@
 				let preloader = document.createElement('div');
 				preloader.className = 'element__preloader';
 				preloader.innerHTML += svg;
-				element[0].innerHTML += preloader.outerHTML;
-				var a = element;
+				a.innerHTML += preloader.outerHTML;
 
-				return requestPage(button, a);
+				return requestPage(button.target, a);
 			}
 		})
 
@@ -192,34 +214,29 @@
 
 	function requestPage(element, a) {
 
-		let url;
-		if(element.srcElement !== undefined) {
-			url = element.srcElement.dataset.url;
-		} else {
-			url = element[0].dataset.url;
-		}
+		const url = element.dataset.url;
 
-		let data = GM_xmlhttpRequest({
+		const data = GM_xmlhttpRequest({
 			method: 'GET',
-			url: url,
+			url,
 			headers: {
 				'User-Agent': 'Mozilla/5.0',
 				'Accept': 'text/xml'
 			},
 			onload: function (response) {
+				//включаем кнопку
+				if(element.srcElement !== undefined) {
+					element.srcElement.disabled = 0;
+				}
+
+				//удаляем прелодер
+				if(a !== undefined) {
+					if(a.children[1].classList.contains('element__preloader')){
+						a.children[1].remove();
+					}
+				}
 
 				if(response.status === 200) {
-
-					//включаем кнопку
-					if(element.srcElement !== undefined) {
-						element.srcElement.disabled = 0;
-					}
-
-					//удаляем прелодер
-					if(a[0] !== undefined) {
-						a[0].children[1].remove();
-					}
-
 					requestPageResponse(element, a, response);
 				}
 			}
@@ -235,27 +252,16 @@
 		let arr = [];
 		for (var i = 1; i < items.length; ++i) {
 			items[i].className += ' id-'+[i];
-
 			let kpSearch = items[i].innerHTML.match(/Кинопоиск|IMDb/m);
-
-			if(kpSearch) {
-				arr.push(kpSearch);
-			}
+			kpSearch && arr.push(kpSearch);
 		}
 
 		let imdb_rating, kp_rating;
 		let kp_matches = arr.filter(value => /^Кинопоиск/.test(value));
 		let imdb_matches = arr.filter(value => /^IMDb/.test(value));
-		if(imdb_matches[0]) {
-			imdb_rating = createRating(imdb_matches[0].input);
-		} else {
-			imdb_rating = 'n/a';
-		}
-		if(kp_matches[0]) {
-			kp_rating = createRating(kp_matches[0].input);
-		} else {
-			kp_rating = 'n/a';
-		}
+
+		imdb_rating = imdb_matches[0] ? createRating(imdb_matches[0].input) : 'n/a';
+		kp_rating = kp_matches[0] ? createRating(kp_matches[0].input) : 'n/a';
 
 		return createRatingRender(kp_rating, imdb_rating, element);
 	}
@@ -272,9 +278,9 @@
 		}
 		if(arr.length > 0 && arr[0][1]) {
 			return arr[0][1]; //rating num (ex. 6.9)
-		} else {
-			return '—';
 		}
+
+		return '—';
 	}
 
 	function createRatingRender(kp_rating, imdb_rating, element) {
@@ -282,51 +288,56 @@
 			<span class="final__rating">КП: ${kp_rating}</span>
 			<span class="final__rating">IMDb: ${imdb_rating}</span>
 			`;
-		//для кнопки в топе
-		if(element.srcElement !== undefined) {
-			if(!element.srcElement.classList.contains('static')){
-				element.srcElement.classList += ' static';
-			}
-
-			element.srcElement.innerHTML = h;
-			element.srcElement.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
-		//для главной страницы (0-20)
-		} else {
-			if(!element.hasClass('static')) {
-				element.addClass('static');
-			}
-			$(element).html(h);
+		if(!element.classList.contains('static')) {
+			element.classList += ' static';
 		}
+		element.innerHTML = h;
+		element.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
 	}
 
 	function createMainPageRatingsElement() {
-		$('.tp1_body').each(function(){
-			let img = $(this).find('.tp1_img');
-			let a = img.parent();
-			img.after(`<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
-			a.find('.element__rating-div').attr('data-url', a.attr('href'))
+		const tpBody = [...document.querySelectorAll('.tp1_body')];
+		tpBody.map(el => {
+			const a = el.children[0];
+			const img = a.children[0];
+			img.insertAdjacentHTML('afterend', `<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
+			const div = a.children[1];
+			div.dataset.url = a.getAttribute("href");
 		});
 	}
-	createMainPageRatingsElement();
 
 	function mainPageRatings() {
 		//call func when user has an item in sight (https://github.com/imakewebthings/waypoints)
-		$('.tp1_border > .tp1_body').each(function() {
-			let self = $(this);
-			let a = self.find('a');
-			let element = a.find('.element__rating-div');
-			a.addClass('tp1_a');
+		const waypoints = [...document.querySelectorAll('.tp1_border > .tp1_body')];
+		waypoints.map(el => {
+			const self = el;
+			const a = el.children[0];
+			const element = a.children[1];
+
+			a.classList += ' tp1_a';
+
 			const waypoint = new Waypoint({
-				element: self[0],
+				element: self,
 				handler(direction) {
 					const th = this;
-					requestPage(element, a[0]);
-					self.addClass('__init');
+					requestPage(element, a);
+					self.classList += ' __init';
 					th.destroy();
 				}, offset: '80%'
 			});
 		});
 	}
-	mainPageRatings();
+
+	//INIT
+	(function init() {
+		if(showTopPageRatingEnable) {
+			createWrapper();
+		}
+
+		if(showMainPageRatingEnable) {
+			createMainPageRatingsElement();
+			mainPageRatings();
+		}
+	})();
 
 })();
