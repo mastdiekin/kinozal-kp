@@ -171,13 +171,15 @@ const reGetRating = false; //отключает повторное нажати�
 	}
 	`;
 
+	const tpBody = [...document.querySelectorAll(".tp1_body")];
+
 	showTopPageRatingEnable && GM_addStyle(disabledStyles); //стили при выключенном рейтинге в /top.php
 	GM_addStyle(styles);
 
 	function wrap(toWrap, wrapper) {
 		wrapper = wrapper || document.createElement("div");
 		toWrap.parentNode.appendChild(wrapper);
-		wrapper.classList += "element__wrapper";
+		wrapper.classList.add("element__wrapper");
 		return wrapper.appendChild(toWrap);
 	}
 
@@ -215,7 +217,7 @@ const reGetRating = false; //отключает повторное нажати�
 		element = element.dataset.url ? element : element.parentElement;
 		const url = element.dataset.url;
 
-		const data = GM_xmlhttpRequest({
+		return GM_xmlhttpRequest({
 			method: "GET",
 			url,
 			headers: {
@@ -227,15 +229,9 @@ const reGetRating = false; //отключает повторное нажати�
 				if (element !== undefined) element.disabled = false;
 
 				//удаляем прелодер
-				if (a !== undefined) {
-					if (a.children[1].classList.contains("element__preloader")) {
-						a.children[1].remove();
-					}
-				}
+				if (a !== undefined && a.children[1].classList.contains("element__preloader")) a.children[1].remove();
 
-				if (response.status === 200) {
-					requestPageResponse(element, a, response);
-				}
+				if (response.status === 200) requestPageResponse(element, a, response);
 			},
 		});
 	}
@@ -277,46 +273,51 @@ const reGetRating = false; //отключает повторное нажати�
 		return arr.length > 0 && arr[0][1] ? arr[0][1] : "-";
 	}
 
-	function createRatingRender(kp_rating, imdb_rating, element) {
-		let h = `
-			<span class="final__rating">КП: ${kp_rating}</span>
-			<span class="final__rating">IMDb: ${imdb_rating}</span>
-			`;
-		if (!element.classList.contains("static")) {
-			element.classList += " static";
-		}
-		element.innerHTML = h;
-		element.title = `Кинопоиск: ${kp_rating}, IMDb: ${imdb_rating}`;
+	function ratingHtmlTemplate(kp, imdb) {
+		return {
+			template: `
+				<span class="final__rating">КП: ${kp}</span>
+				<span class="final__rating">IMDb: ${imdb}</span>
+			`,
+			title: `Кинопоиск: ${kp}, IMDb: ${imdb}`,
+		};
 	}
 
+	function createRatingRender(kp_rating, imdb_rating, element) {
+		const t = ratingHtmlTemplate(kp_rating, imdb_rating);
+		if (!element.classList.contains("static")) element.classList.add("static");
+		element.innerHTML = t.template;
+		element.title = t.title;
+	}
+
+	/**
+	 * Рейтинги на главной странице
+	 */
 	function createMainPageRatingsElement() {
-		const tpBody = [...document.querySelectorAll(".tp1_body")];
 		tpBody.map((el) => {
 			const a = el.children[0];
 			const img = a.children[0];
 			img.insertAdjacentHTML("afterend", `<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
 			const div = a.children[1];
-			div.dataset.url = a.getAttribute("href");
+			div.dataset.url = a.href;
 		});
 	}
 
 	function mainPageRatings() {
 		//call func when user has an item in sight (https://github.com/imakewebthings/waypoints)
-		const waypoints = [...document.querySelectorAll(".tp1_border > .tp1_body")];
-		waypoints.map((el) => {
+		tpBody.map((el) => {
 			const self = el;
 			const a = el.children[0];
 			const element = a.children[1];
 
-			a.classList += " tp1_a";
+			a.classList.add("tp1_a");
 
-			const waypoint = new Waypoint({
+			return new Waypoint({
 				element: self,
 				handler(direction) {
-					const th = this;
 					requestPage(element, a);
-					self.classList += " __init";
-					th.destroy();
+					self.classList.add("__init");
+					this.destroy();
 				},
 				offset: "80%",
 			});
