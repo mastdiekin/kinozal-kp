@@ -18,6 +18,8 @@
 // @grant              GM_xmlhttpRequest
 // @grant              GM_addStyle
 
+// @license MIT
+
 // ==/UserScript==
 
 /*=======================================================
