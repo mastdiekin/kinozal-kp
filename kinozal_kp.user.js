@@ -3,10 +3,10 @@
 // @namespace          https://github.com/mastdiekin/kinozal-kp
 // @description        Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
 
-// @include            *kinozal.tv/*
-// @include            *kinozal-tv.appspot.com/*
-// @include            *kinozal.me/*
-// @include            *kinozal.guru/*
+// @match              *kinozal.tv/*
+// @match              *kinozal-tv.appspot.com/*
+// @match              *kinozal.me/*
+// @match              *kinozal.guru/*
 
 // @version            1.0.8
 // @author             mastdiekin
