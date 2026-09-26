@@ -8,7 +8,7 @@
 // @match              *kinozal.me/*
 // @match              *kinozal.guru/*
 
-// @version            1.0.8
+// @version            1.0.9
 // @author             mastdiekin
 // @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js
 // @icon               http://kinozal.tv/pic/favicon.ico
@@ -38,6 +38,9 @@ const siteEncoding = "windows-1251";
 (function () {
 	"use strict";
 
+	// -----------------------------------------------------
+	// Конфигурация: цвета, тексты, CSS-классы, селекторы.
+	// -----------------------------------------------------
 	const props = {
 		_brand: "#f1d29c",
 		brand: "#C0A067",
@@ -46,12 +49,26 @@ const siteEncoding = "windows-1251";
 		requestText: "Получить рейтинг",
 	};
 
+	const CLASS = {
+		wrapper: "element__wrapper",
+		ratingButton: "element__rating-button",
+		ratingDiv: "element__rating-div",
+		preloader: "element__preloader",
+		static: "static",
+	};
+
+	const SELECTOR = {
+		topPageBody: ".tp1_body",
+		topPageLinks: ".mn1_content > .bx1.stable a",
+		ratingsList: ".men.w200",
+	};
+
 	const svg = `<svg enable-background="new 0 0 70 70" version="1.1" viewBox="0 0 70 70" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="m35 0c-19.3 0-35 15.7-35 35s15.7 35 35 35 35-15.7 35-35-15.7-35-35-35zm-13.3 13.5c4.7 0 8.4 3.7 8.4 8.4s-3.7 8.4-8.4 8.4-8.4-3.7-8.4-8.4c0.1-4.7 3.8-8.4 8.4-8.4zm0 43c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm9.7-17.9c-2-2-2-5.3 0-7.3s5.3-2 7.3 0 2 5.3 0 7.3-5.3 2.1-7.3 0zm16.9 17.9c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4zm0-26.4c-4.7 0-8.4-3.7-8.4-8.4s3.7-8.4 8.4-8.4 8.4 3.7 8.4 8.4c-0.1 4.7-3.8 8.4-8.4 8.4z" fill="#ffffff"/></svg>`;
 	const base64svg = encodeURI(`data:image/svg+xml,${svg}`).replace("#", "%23");
 
 	const styles = `
-	.element__rating-button,
-	.element__rating-div{
+	.${CLASS.ratingButton},
+	.${CLASS.ratingDiv}{
 		display: block;
 		position: absolute;
 		bottom: 0;
@@ -69,7 +86,7 @@ const siteEncoding = "windows-1251";
 		transition: all ${props.transition};
 		overflow: hidden;
 	}
-	.element__rating-div {
+	.${CLASS.ratingDiv} {
 		opacity: 1;
 		cursor: default;
 		min-width: 50%;
@@ -82,33 +99,33 @@ const siteEncoding = "windows-1251";
 		padding: 5px;
 		box-sizing: border-box;
 	}
-	.element__rating-div .element__preloder {
+	.${CLASS.ratingDiv} .element__preloder {
 		border-radius: 4px 0 0 0;
 	}
-	.element__rating-button:hover {
+	.${CLASS.ratingButton}:hover {
 		background-color: ${props._brand};
 	}
-	.element__wrapper {
+	.${CLASS.wrapper} {
 		display: block;
 		float: left;
 		margin: 0 5px 5px 0;
 		position: relative;
 		*zoom: 1;
 	}
-	.element__wrapper a {
+	.${CLASS.wrapper} a {
 		position: relative;
 		display: block;
 		margin: 0 !important;
 	}
-	.element__wrapper:hover > .element__rating-button {
+	.${CLASS.wrapper}:hover > .${CLASS.ratingButton} {
 		opacity: 1;
 	}
-	.element__wrapper::after {
-		content: " "
-		display: table
-		clear: both
+	.${CLASS.wrapper}::after {
+		content: " ";
+		display: table;
+		clear: both;
 	}
-	.element__preloader {
+	.${CLASS.preloader} {
 		position: absolute;
 		top: 0;
 		bottom: 0;
@@ -120,27 +137,27 @@ const siteEncoding = "windows-1251";
 		align-items: center;
 		transition: all ${props.transition};
 	}
-	.element__preloader svg {
+	.${CLASS.preloader} svg {
 		height: 50px;
 		fill: ${props._brand};
 		animation: linear 2s rotate infinite;
 	}
-	.element__preloader svg path {
+	.${CLASS.preloader} svg path {
 		fill: ${props._brand};
 	}
-	.static {
+	.${CLASS.static} {
 		opacity: 1;
 		background-color: ${props.brand};
 		line-height: 20px;
 	}
-	.static::before {
+	.${CLASS.static}::before {
 		content: url('${base64svg}');
 		width: 28px;
 		position: absolute;
 		bottom: -15px;
 		left: -10px;
 	}
-	.static:hover {
+	.${CLASS.static}:hover {
 		background-color: ${props.brand} !important;
 	}
 	.final__rating {
@@ -174,20 +191,35 @@ const siteEncoding = "windows-1251";
 	}
 	`;
 
-	const tpBody = [...document.querySelectorAll(".tp1_body")];
+	const tpBody = [...document.querySelectorAll(SELECTOR.topPageBody)];
 
 	showTopPageRatingEnable && GM_addStyle(disabledStyles); //стили при выключенном рейтинге в /top.php
 	GM_addStyle(styles);
 
+	// -----------------------------------------------------
+	// DOM-хелперы
+	// -----------------------------------------------------
+
 	function wrap(toWrap, wrapper) {
 		wrapper = wrapper || document.createElement("div");
 		toWrap.parentNode.appendChild(wrapper);
-		wrapper.classList.add("element__wrapper");
+		wrapper.classList.add(CLASS.wrapper);
 		return wrapper.appendChild(toWrap);
 	}
 
+	function createPreloaderElement() {
+		const preloader = document.createElement("div");
+		preloader.className = CLASS.preloader;
+		preloader.innerHTML = svg;
+		return preloader;
+	}
+
+	// -----------------------------------------------------
+	// Топ страница (top.php): кнопка "Рейтинг" по клику
+	// -----------------------------------------------------
+
 	function createWrapper() {
-		const content = [...document.querySelectorAll(".mn1_content > .bx1.stable a")];
+		const content = [...document.querySelectorAll(SELECTOR.topPageLinks)];
 		content.map((a) => {
 			wrap(a);
 			createButton(a);
@@ -196,24 +228,25 @@ const siteEncoding = "windows-1251";
 
 	function createButton(a) {
 		let button = document.createElement("button");
-		button.className = "element__rating-button";
+		button.className = CLASS.ratingButton;
 		button.id = "rating";
-		button.innerHTML += props.buttonText;
+		button.textContent = props.buttonText;
 		button.dataset.url = a.href;
 		button.setAttribute("title", props.requestText);
 		a.parentNode.appendChild(button);
 		button.addEventListener("click", function (e) {
-			if (!this.classList.contains("static") || reGetRating) {
+			if (!this.classList.contains(CLASS.static) || reGetRating) {
 				//отключаем кнопку
 				e.target.disabled = true;
-				let preloader = document.createElement("div");
-				preloader.className = "element__preloader";
-				preloader.innerHTML += svg;
-				a.innerHTML += preloader.outerHTML;
+				a.appendChild(createPreloaderElement());
 				return requestPage(e.target, a);
 			}
 		});
 	}
+
+	// -----------------------------------------------------
+	// Запрос страницы раздачи и разбор рейтингов
+	// -----------------------------------------------------
 
 	async function requestPage(element, a) {
 		element = element.dataset.url ? element : element.parentElement;
@@ -239,10 +272,8 @@ const siteEncoding = "windows-1251";
 		} finally {
 			element.disabled = false;
 
-			const preloader = a?.children[1];
-			if (preloader?.classList.contains("element__preloader")) {
-				preloader.remove();
-			}
+			const preloader = a?.querySelector(`.${CLASS.preloader}`);
+			preloader?.remove();
 		}
 	}
 
@@ -250,7 +281,12 @@ const siteEncoding = "windows-1251";
 		let doc = response.responseText;
 		let html = new DOMParser().parseFromString(doc, "text/html");
 
-		let ul = html.querySelector(".men.w200");
+		let ul = html.querySelector(SELECTOR.ratingsList);
+		if (!ul) {
+			console.error("Не найден список рейтингов на странице раздачи");
+			return;
+		}
+
 		let items = ul.getElementsByTagName("li");
 		let arr = [];
 		for (var i = 1; i < items.length; ++i) {
@@ -295,19 +331,23 @@ const siteEncoding = "windows-1251";
 
 	function createRatingRender(kp_rating, imdb_rating, element) {
 		const t = ratingHtmlTemplate(kp_rating, imdb_rating);
-		if (!element.classList.contains("static")) element.classList.add("static");
+		if (!element.classList.contains(CLASS.static)) element.classList.add(CLASS.static);
 		element.innerHTML = t.template;
 		element.title = t.title;
 	}
 
-	/**
-	 * Рейтинги на главной странице
-	 */
+	// -----------------------------------------------------
+	// Рейтинги на главной странице
+	// -----------------------------------------------------
+
 	function createMainPageRatingsElement() {
 		tpBody.map((el) => {
 			const a = el.children[0];
 			const img = a.children[0];
-			img.insertAdjacentHTML("afterend", `<div class='element__rating-div'><div class='element__preloader'>${svg}</div></div>`);
+			img.insertAdjacentHTML(
+				"afterend",
+				`<div class='${CLASS.ratingDiv}'><div class='${CLASS.preloader}'>${svg}</div></div>`
+			);
 			const div = a.children[1];
 			div.dataset.url = a.href;
 		});
