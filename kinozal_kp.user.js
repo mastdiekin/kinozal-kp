@@ -33,6 +33,7 @@
 const showMainPageRatingEnable = true; //показывает рейтинг у раздач на гллавной сайта
 const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
 const reGetRating = false; //отключает повторное нажатие на пнопку "Рейтинг"
+const siteEncoding = "windows-1251";
 
 (function () {
 	"use strict";
@@ -214,28 +215,35 @@ const reGetRating = false; //отключает повторное нажати�
 		});
 	}
 
-	function requestPage(element, a) {
-		//проверим не кликнуто ли на span с рейтингом и получим именно кнопку.
+	async function requestPage(element, a) {
 		element = element.dataset.url ? element : element.parentElement;
 		const url = element.dataset.url;
 
-		return GM_xmlhttpRequest({
-			method: "GET",
-			url,
-			headers: {
-				"User-Agent": "Mozilla/5.0",
-				Accept: "text/xml",
-			},
-			onload: function (response) {
-				//включаем кнопку
-				if (element !== undefined) element.disabled = false;
+		try {
+			const response = await fetch(url, {
+				credentials: "include",
+			});
 
-				//удаляем прелодер
-				if (a !== undefined && a.children[1].classList.contains("element__preloader")) a.children[1].remove();
+			const buffer = await response.arrayBuffer();
+			const text = new TextDecoder(siteEncoding).decode(buffer);
 
-				if (response.status === 200) requestPageResponse(element, a, response);
-			},
-		});
+			if (!response.ok) {
+				console.error(text.slice(0, 500));
+				return;
+			}
+
+			requestPageResponse(element, a, {
+				status: response.status,
+				responseText: text,
+			});
+		} finally {
+			element.disabled = false;
+
+			const preloader = a?.children[1];
+			if (preloader?.classList.contains("element__preloader")) {
+				preloader.remove();
+			}
+		}
 	}
 
 	function requestPageResponse(element, a, response) {
