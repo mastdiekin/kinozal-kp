@@ -290,10 +290,11 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 		a.parentNode.appendChild(button);
 		button.addEventListener("click", function (e) {
 			if (!this.classList.contains(CLASS.static) || reGetRating) {
+				const skipCache = this.classList.contains(CLASS.static); // повторное нажатие
 				//отключаем кнопку
 				e.target.disabled = true;
 				a.appendChild(createPreloaderElement());
-				return requestPage(e.target, a);
+				return requestPage(e.target, a, skipCache);
 			}
 		});
 	}
@@ -302,13 +303,13 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 	// Запрос страницы раздачи и разбор рейтингов
 	// -----------------------------------------------------
 
-	async function requestPage(element, a) {
+	async function requestPage(element, a, skipCache = false) {
 		element = element.dataset.url ? element : element.parentElement;
 		const url = element.dataset.url;
 
 		try {
-			// если рейтинг есть в кэше, запрос к сайту не нужен
-			const cached = getCachedRating(url);
+			// если рейтинг есть в кэше, запрос к сайту не нужен. При reGetRating === True - получаем рейтинг по новому
+			const cached = skipCache ? null : getCachedRating(url);
 			if (cached) {
 				createRatingRender(cached.kp, cached.imdb, element);
 				return;
