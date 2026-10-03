@@ -13,6 +13,8 @@
 // @icon               https://www.google.com/s2/favicons?sz=64&domain=kinozal.guru
 
 // @grant              GM_registerMenuCommand
+// @grant              GM_listValues
+// @grant              GM_deleteValue
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_addStyle
@@ -34,6 +36,8 @@ const showTopPageRatingEnable = GM_getValue("showTopPageRating", true); //доб
 const reGetRating = GM_getValue("reGetRating", false); //разрешает повторное нажатие на кнопку "Рейтинг"
 const siteEncoding = "windows-1251";
 const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинга в кэше по умолчанию
+const CACHE_PREFIX = "rating:"; //префикс ключей кэша, по нему отличаем кэш от настроек
+const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить просроченные записи (раз в сутки)
 
 (function () {
 	"use strict";
@@ -234,10 +238,30 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 	function cacheKey(url) {
 		try {
 			const id = new URL(url).searchParams.get("id");
-			return "rating:" + (id || url);
+			return CACHE_PREFIX + (id || url);
 		} catch (e) {
-			return "rating:" + url;
+			return CACHE_PREFIX + url;
 		}
+	}
+
+	function getCacheKeys() {
+		return GM_listValues().filter((key) => key.startsWith(CACHE_PREFIX));
+	}
+
+	// удаляет просроченные и повреждённые записи, не чаще раза в PRUNE_INTERVAL
+	function pruneExpiredCache() {
+		const elapsed = Date.now() - Number(GM_getValue("lastPruneTime", 0));
+		if (elapsed >= 0 && elapsed < PRUNE_INTERVAL) return;
+
+		const ttl = getCacheTtlHours() * 60 * 60 * 1000;
+		getCacheKeys().forEach((key) => {
+			const entry = GM_getValue(key);
+			if (!entry || !entry.time || Date.now() - entry.time >= ttl) {
+				GM_deleteValue(key);
+			}
+		});
+
+		GM_setValue("lastPruneTime", Date.now());
 	}
 
 	function getCacheTtlHours() {
@@ -266,6 +290,18 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 
 		GM_setValue("cacheTtlHours", hours);
 		alert(`Сохранено: ${hours} ч. Применится сразу, а название пункта обновится после перезагрузки страницы.`);
+	});
+
+	GM_registerMenuCommand("Очистить кэш рейтингов", () => {
+		const keys = getCacheKeys();
+		if (!keys.length) {
+			alert("Кэш уже пуст");
+			return;
+		}
+		if (!confirm(`Удалить сохранённые рейтинги (${keys.length} шт.)?`)) return;
+
+		keys.forEach((key) => GM_deleteValue(key));
+		alert("Кэш очищен. Уже показанные рейтинги на странице останутся до перезагрузки.");
 	});
 
 	function setCachedRating(url, value) {
@@ -467,6 +503,9 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 		registerToggle("showMainPageRating", "Рейтинг на главной", showMainPageRatingEnable);
 		registerToggle("showTopPageRating", "Кнопка «Рейтинг» в топе", showTopPageRatingEnable);
 		registerToggle("reGetRating", "Повторный запрос рейтинга по кнопке", reGetRating);
+
+		// Очистка просроченных записей
+		pruneExpiredCache();
 
 		if (showTopPageRatingEnable) {
 			createWrapper();
