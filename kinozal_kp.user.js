@@ -30,9 +30,9 @@
 
 */
 
-const showMainPageRatingEnable = true; //показывает рейтинг у раздач на гллавной сайта
-const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
-const reGetRating = false; //отключает повторное нажатие на пнопку "Рейтинг"
+const showMainPageRatingEnable = GM_getValue("showMainPageRating", true); //показывает рейтинг у раздач на главной сайта
+const showTopPageRatingEnable = GM_getValue("showTopPageRating", true); //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
+const reGetRating = GM_getValue("reGetRating", false); //разрешает повторное нажатие на кнопку "Рейтинг"
 const siteEncoding = "windows-1251";
 const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинга в кэше по умолчанию
 
@@ -196,6 +196,16 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 
 	showTopPageRatingEnable && GM_addStyle(disabledStyles); //стили при выключенном рейтинге в /top.php
 	GM_addStyle(styles);
+
+	// -----------------------------------------------------
+	// Toggle функции
+	// -----------------------------------------------------
+	function registerToggle(key, label, current) {
+		GM_registerMenuCommand(`${current ? "✅" : "❌"} ${label}`, () => {
+			GM_setValue(key, !current);
+			location.reload();
+		});
+	}
 
 	// -----------------------------------------------------
 	// DOM-хелперы
@@ -441,6 +451,10 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 
 	//INIT
 	(function init() {
+		registerToggle("showMainPageRating", "Рейтинг на главной", showMainPageRatingEnable);
+		registerToggle("showTopPageRating", "Кнопка «Рейтинг» в топе", showTopPageRatingEnable);
+		registerToggle("reGetRating", "Повторный запрос рейтинга по кнопке", reGetRating);
+
 		if (showTopPageRatingEnable) {
 			createWrapper();
 		}
