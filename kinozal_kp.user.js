@@ -12,6 +12,7 @@
 // @author             mastdiekin
 // @icon               http://kinozal.tv/pic/favicon.ico
 
+// @grant              GM_registerMenuCommand
 // @grant              GM_getValue
 // @grant              GM_setValue
 // @grant              GM_xmlhttpRequest
@@ -33,7 +34,7 @@ const showMainPageRatingEnable = true; //показывает рейтинг у 
 const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
 const reGetRating = false; //отключает повторное нажатие на пнопку "Рейтинг"
 const siteEncoding = "windows-1251";
-const CACHE_TTL = 24 * 60 * 60 * 1000; //время хранения рейтинга в кэше (24 часа)
+const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинга в кэше по умолчанию
 
 (function () {
 	"use strict";
@@ -227,10 +228,33 @@ const CACHE_TTL = 24 * 60 * 60 * 1000; //время хранения рейти�
 		}
 	}
 
+	function getCacheTtlHours() {
+		const hours = Number(GM_getValue("cacheTtlHours", DEFAULT_CACHE_TTL_HOURS));
+		return Number.isFinite(hours) && hours >= 0 ? hours : DEFAULT_CACHE_TTL_HOURS;
+	}
+
 	function getCachedRating(url) {
 		const entry = GM_getValue(cacheKey(url));
-		return entry && Date.now() - entry.time < CACHE_TTL ? entry.value : null;
+		const ttl = getCacheTtlHours() * 60 * 60 * 1000;
+		return entry && Date.now() - entry.time < ttl ? entry.value : null;
 	}
+
+	GM_registerMenuCommand(`Время кэша рейтингов: ${getCacheTtlHours()} ч`, () => {
+		const input = prompt(
+			"Сколько часов хранить рейтинги в кэше? (0 — не кэшировать)",
+			getCacheTtlHours()
+		);
+		if (input === null) return; // нажали отмену
+
+		const hours = parseFloat(input.replace(",", "."));
+		if (!Number.isFinite(hours) || hours < 0) {
+			alert("Введите число не меньше нуля");
+			return;
+		}
+
+		GM_setValue("cacheTtlHours", hours);
+		alert(`Сохранено: ${hours} ч. Применится сразу, а название пункта обновится после перезагрузки страницы.`);
+	});
 
 	function setCachedRating(url, value) {
 		GM_setValue(cacheKey(url), { time: Date.now(), value });
