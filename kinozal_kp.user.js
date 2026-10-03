@@ -47,6 +47,9 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 		transition: ".1s ease",
 		buttonText: "Рейтинг",
 		requestText: "Получить рейтинг",
+		errorText: "Ошибка. Повторить?", // кнопка в топе: клик перезапускает запрос
+		errorTextStatic: "Ошибка", // плашка на главной: повтора нет
+		errorTitle: "Не удалось загрузить рейтинг",
 	};
 
 	const CLASS = {
@@ -324,13 +327,16 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 
 			if (!response.ok) {
 				console.error(text.slice(0, 500));
-				return;
+				throw new Error(`HTTP ${response.status}`);
 			}
 
 			requestPageResponse(element, a, {
 				status: response.status,
 				responseText: text,
 			});
+		} catch (err) {
+			console.error("Не удалось получить рейтинг:", err);
+			renderError(element);
 		} finally {
 			element.disabled = false;
 
@@ -345,8 +351,7 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 
 		let ul = html.querySelector(SELECTOR.ratingsList);
 		if (!ul) {
-			console.error("Не найден список рейтингов на странице раздачи");
-			return;
+			throw new Error("Не найден список рейтингов на странице раздачи");
 		}
 
 		let items = ul.getElementsByTagName("li");
@@ -370,6 +375,15 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 		}
 
 		return createRatingRender(kp_rating, imdb_rating, element);
+	}
+
+	function renderError(element) {
+		// если рейтинг уже показан (повторный запрос по кнопке), оставляем его
+		if (element.classList.contains(CLASS.static)) return;
+
+		const isMainPageBadge = element.classList.contains(CLASS.ratingDiv);
+		element.textContent = isMainPageBadge ? props.errorTextStatic : props.errorText;
+		element.title = isMainPageBadge ? `${props.errorTitle}. Обновите страницу` : props.errorTitle;
 	}
 
 	function createRating(str) {
