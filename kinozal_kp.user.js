@@ -33,6 +33,7 @@ const showMainPageRatingEnable = true; //показывает рейтинг у 
 const showTopPageRatingEnable = true; //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
 const reGetRating = false; //отключает повторное нажатие на пнопку "Рейтинг"
 const siteEncoding = "windows-1251";
+const CACHE_TTL = 24 * 60 * 60 * 1000; //время хранения рейтинга в кэше (24 часа)
 
 (function () {
 	"use strict";
@@ -214,6 +215,28 @@ const siteEncoding = "windows-1251";
 	}
 
 	// -----------------------------------------------------
+	// Кэш рейтингов
+	// -----------------------------------------------------
+
+	function cacheKey(url) {
+		try {
+			const id = new URL(url).searchParams.get("id");
+			return "rating:" + (id || url);
+		} catch (e) {
+			return "rating:" + url;
+		}
+	}
+
+	function getCachedRating(url) {
+		const entry = GM_getValue(cacheKey(url));
+		return entry && Date.now() - entry.time < CACHE_TTL ? entry.value : null;
+	}
+
+	function setCachedRating(url, value) {
+		GM_setValue(cacheKey(url), { time: Date.now(), value });
+	}
+
+	// -----------------------------------------------------
 	// Топ страница (top.php): кнопка "Рейтинг" по клику
 	// -----------------------------------------------------
 
@@ -252,6 +275,13 @@ const siteEncoding = "windows-1251";
 		const url = element.dataset.url;
 
 		try {
+			// если рейтинг есть в кэше, запрос к сайту не нужен
+			const cached = getCachedRating(url);
+			if (cached) {
+				createRatingRender(cached.kp, cached.imdb, element);
+				return;
+			}
+
 			const response = await fetch(url, {
 				credentials: "include",
 			});
@@ -300,6 +330,11 @@ const siteEncoding = "windows-1251";
 
 		imdb_rating = imdb_matches[0] ? createRating(imdb_matches[0].input) : "n/a";
 		kp_rating = kp_matches[0] ? createRating(kp_matches[0].input) : "n/a";
+
+		// сохраняем в кэш, только если нашёлся хотя бы один рейтинг
+		if (kp_rating !== "n/a" || imdb_rating !== "n/a") {
+			setCachedRating(element.dataset.url, { kp: kp_rating, imdb: imdb_rating });
+		}
 
 		return createRatingRender(kp_rating, imdb_rating, element);
 	}
