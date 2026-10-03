@@ -10,7 +10,7 @@
 
 // @version            1.0.9
 // @author             mastdiekin
-// @icon               http://kinozal.tv/pic/favicon.ico
+// @icon               https://www.google.com/s2/favicons?sz=64&domain=kinozal.guru
 
 // @grant              GM_registerMenuCommand
 // @grant              GM_getValue
