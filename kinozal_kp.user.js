@@ -52,7 +52,6 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
 		buttonText: "Рейтинг",
 		requestText: "Получить рейтинг",
 		errorText: "Ошибка. Повторить?", // кнопка в топе: клик перезапускает запрос
-		errorTextStatic: "Ошибка", // плашка на главной: повтора нет
 		errorTitle: "Не удалось загрузить рейтинг",
 	};
 
@@ -62,6 +61,7 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
 		ratingDiv: "element__rating-div",
 		preloader: "element__preloader",
 		static: "static",
+		error: "element__error",
 	};
 
 	const SELECTOR = {
@@ -108,6 +108,12 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
 	}
 	.${CLASS.ratingDiv} .element__preloader {
 		border-radius: 4px 0 0 0;
+	}
+	.${CLASS.ratingDiv}.${CLASS.error} {
+		cursor: pointer;
+	}
+	.${CLASS.ratingDiv}.${CLASS.error}:hover {
+		background-color: ${props._brand};
 	}
 	.${CLASS.ratingButton}:hover {
 		background-color: ${props._brand};
@@ -417,9 +423,26 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
 		// если рейтинг уже показан (повторный запрос по кнопке), оставляем его
 		if (element.classList.contains(CLASS.static)) return;
 
-		const isMainPageBadge = element.classList.contains(CLASS.ratingDiv);
-		element.textContent = isMainPageBadge ? props.errorTextStatic : props.errorText;
-		element.title = isMainPageBadge ? `${props.errorTitle}. Обновите страницу` : props.errorTitle;
+		element.textContent = props.errorText;
+		element.title = props.errorTitle;
+
+		// на главной плашка не кнопка, поэтому делаем её кликабельной для повтора
+		if (element.classList.contains(CLASS.ratingDiv)) {
+			element.classList.add(CLASS.error);
+			element.addEventListener("click", retryMainPageBadge, { once: true });
+		}
+	}
+
+	function retryMainPageBadge(e) {
+		e.preventDefault(); // плашка лежит внутри ссылки на раздачу
+		e.stopPropagation();
+
+		const element = e.currentTarget;
+		element.classList.remove(CLASS.error);
+		element.removeAttribute("title");
+		element.replaceChildren(createPreloaderElement());
+
+		requestPage(element, element.parentElement);
 	}
 
 	function createRating(str) {
