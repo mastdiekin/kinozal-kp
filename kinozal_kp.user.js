@@ -15,7 +15,6 @@
 // @grant              GM_registerMenuCommand
 // @grant              GM_getValue
 // @grant              GM_setValue
-// @grant              GM_xmlhttpRequest
 // @grant              GM_addStyle
 
 // @license MIT
@@ -100,7 +99,7 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 		padding: 5px;
 		box-sizing: border-box;
 	}
-	.${CLASS.ratingDiv} .element__preloder {
+	.${CLASS.ratingDiv} .element__preloader {
 		border-radius: 4px 0 0 0;
 	}
 	.${CLASS.ratingButton}:hover {
@@ -285,7 +284,6 @@ const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинг
 	function createButton(a) {
 		let button = document.createElement("button");
 		button.className = CLASS.ratingButton;
-		button.id = "rating";
 		button.textContent = props.buttonText;
 		button.dataset.url = a.href;
 		button.setAttribute("title", props.requestText);
