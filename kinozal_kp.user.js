@@ -10,7 +10,6 @@
 
 // @version            1.0.9
 // @author             mastdiekin
-// @require            https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js
 // @icon               http://kinozal.tv/pic/favicon.ico
 
 // @grant              GM_getValue
@@ -353,26 +352,33 @@ const siteEncoding = "windows-1251";
 		});
 	}
 
-	function mainPageRatings() {
-		//call func when user has an item in sight (https://github.com/imakewebthings/waypoints)
-		tpBody.map((el) => {
-			const self = el;
-			const a = el.children[0];
-			const element = a.children[1];
+    function mainPageRatings() {
+        // Запрашиваем рейтинг, когда карточка появляется в области видимости
+        const observer = new IntersectionObserver(
+            (entries, obs) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) return;
 
-			a.classList.add("tp1_a");
+                    const self = entry.target;
+                    obs.unobserve(self);
 
-			return new Waypoint({
-				element: self,
-				handler(direction) {
-					requestPage(element, a);
-					self.classList.add("__init");
-					this.destroy();
-				},
-				offset: "80%",
-			});
-		});
-	}
+                    const a = self.children[0];
+                    const element = a.children[1];
+
+                    requestPage(element, a);
+                    self.classList.add("__init");
+                });
+            },
+            {
+                rootMargin: "0px 0px 200px 0px",
+            }
+        );
+
+        tpBody.forEach((el) => {
+            el.children[0].classList.add("tp1_a");
+            observer.observe(el);
+        });
+    }
 
 	//INIT
 	(function init() {
