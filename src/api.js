@@ -15,8 +15,8 @@ function createRating(str) {
 	return arr.length > 0 && arr[0][1] ? arr[0][1] : "-";
 }
 
-// разбирает HTML страницы раздачи, возвращает { kp, imdb }
-function parseRatings(text) {
+// разбирает HTML страницы раздачи, возвращает { kp, imdb } (экспортируется для тестов)
+export function parseRatings(text) {
 	let html = new DOMParser().parseFromString(text, "text/html");
 
 	let ul = html.querySelector(SELECTOR.ratingsList);

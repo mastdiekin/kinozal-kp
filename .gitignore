@@ -3,3 +3,4 @@ desktop.ini
 *.sublime-workspace
 *.sublime-project
 dist
+coverage
