@@ -8,17 +8,10 @@ import { registerToggles, showMainPageRatingEnable, showTopPageRatingEnable } fr
 (function () {
 	"use strict";
 
-	// -----------------------------------------------------
-	// Стили
-	// -----------------------------------------------------
 	// Стили при выключенном рейтинге в /top.php
-	showTopPageRatingEnable && GM_addStyle(disabledStyles);
+	if (showTopPageRatingEnable) GM_addStyle(disabledStyles);
 
 	GM_addStyle(styles);
-
-	// -----------------------------------------------------
-	// INIT
-	// -----------------------------------------------------
 
 	// Кэш
 	registerCacheMenu();

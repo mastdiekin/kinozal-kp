@@ -11,7 +11,7 @@ export const CLASS = {
 	preloader: "element__preloader",
 	static: "static",
 	error: "element__error",
-};
+} as const;
 
 export const styles = `
 .${CLASS.ratingButton},
@@ -143,7 +143,7 @@ export const SELECTOR = {
 	topPageBody: ".tp1_body",
 	topPageLinks: ".mn1_content > .bx1.stable a",
 	ratingsList: ".men.w200",
-};
+} as const;
 
 export const disabledStyles = `
 .stable a {

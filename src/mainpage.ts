@@ -2,27 +2,32 @@ import { CLASS, SELECTOR, svg } from "./styles";
 import { requestPage } from "./rating";
 
 // снимок карточек делается при загрузке модуля, до любых изменений DOM
-const tpBody = [...document.querySelectorAll(SELECTOR.topPageBody)];
+const tpBody = [...document.querySelectorAll<HTMLElement>(SELECTOR.topPageBody)];
+
+interface CardParts {
+	a: HTMLAnchorElement;
+	img: HTMLElement;
+}
 
 // возвращает ссылку и картинку карточки, либо null, если вёрстка другая
-function getCardParts(el) {
-	const a = el.children[0];
-	const img = a?.children[0];
+function getCardParts(el: HTMLElement): CardParts | null {
+	const a = el.children[0] as HTMLAnchorElement | undefined;
+	const img = a?.children[0] as HTMLElement | undefined;
 	return a && img ? { a, img } : null;
 }
 
-function createMainPageRatingsElement() {
+function createMainPageRatingsElement(): void {
 	tpBody.forEach((el) => {
 		const parts = getCardParts(el);
 		if (!parts) return; // нестандартная карточка, пропускаем
 
 		const { a, img } = parts;
 		img.insertAdjacentHTML("afterend", `<div class='${CLASS.ratingDiv}'><div class='${CLASS.preloader}'>${svg}</div></div>`);
-		img.nextElementSibling.dataset.url = a.href;
+		(img.nextElementSibling as HTMLElement).dataset.url = a.href;
 	});
 }
 
-function mainPageRatings() {
+function mainPageRatings(): void {
 	// Запрашиваем рейтинг, когда карточка появляется в области видимости
 	const observer = new IntersectionObserver(
 		(entries, obs) => {
@@ -33,10 +38,10 @@ function mainPageRatings() {
 				obs.unobserve(self);
 
 				const a = self.children[0];
-				const element = a?.querySelector(`.${CLASS.ratingDiv}`);
+				const element = a?.querySelector<HTMLElement>(`.${CLASS.ratingDiv}`);
 				if (!element) return; // для этой карточки плашка не создана
 
-				requestPage(element, a);
+				void requestPage(element, a);
 				self.classList.add("__init");
 			});
 		},
@@ -54,7 +59,7 @@ function mainPageRatings() {
 	});
 }
 
-export function initMainPageRatings() {
+export function initMainPageRatings(): void {
 	createMainPageRatingsElement();
 	mainPageRatings();
 }

@@ -6,6 +6,8 @@ import { requestPage } from "../src/rating";
 
 jest.mock("../src/api", () => ({ fetchRatings: jest.fn() }));
 
+const fetchRatingsMock = fetchRatings as jest.MockedFunction<typeof fetchRatings>;
+
 const URL = "https://kinozal.tv/details.php?id=1";
 
 // плашка на главной: div внутри ссылки
@@ -49,7 +51,7 @@ describe("requestPage", () => {
 	});
 
 	test("при промахе запрашивает сайт, показывает и кэширует результат", async () => {
-		fetchRatings.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
+		fetchRatingsMock.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
 		const { a, element } = makeBadge();
 
 		await requestPage(element, a);
@@ -62,7 +64,7 @@ describe("requestPage", () => {
 
 	test("skipCache игнорирует кэш и обновляет его", async () => {
 		setCachedRating(URL, { kp: "1.0", imdb: "1.0" });
-		fetchRatings.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
+		fetchRatingsMock.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
 		const { a, element } = makeButton();
 
 		await requestPage(element, a, true);
@@ -73,7 +75,7 @@ describe("requestPage", () => {
 	});
 
 	test("не кэширует результат, где нет ни одного рейтинга", async () => {
-		fetchRatings.mockResolvedValue({ kp: "n/a", imdb: "n/a" });
+		fetchRatingsMock.mockResolvedValue({ kp: "n/a", imdb: "n/a" });
 		const { a, element } = makeBadge();
 
 		await requestPage(element, a);
@@ -83,7 +85,7 @@ describe("requestPage", () => {
 	});
 
 	test("убирает прелоадер и снимает disabled с кнопки", async () => {
-		fetchRatings.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
+		fetchRatingsMock.mockResolvedValue({ kp: "7.5", imdb: "7.3" });
 		const { a, element } = makeButton();
 		element.disabled = true;
 
@@ -96,7 +98,7 @@ describe("requestPage", () => {
 
 describe("ошибки", () => {
 	test("на плашке главной показывает ошибку и делает её кликабельной", async () => {
-		fetchRatings.mockRejectedValue(new Error("HTTP 503"));
+		fetchRatingsMock.mockRejectedValue(new Error("HTTP 503"));
 		const { a, element } = makeBadge();
 
 		await requestPage(element, a);
@@ -107,7 +109,7 @@ describe("ошибки", () => {
 	});
 
 	test("на кнопке в топе показывает ошибку без класса кликабельной плашки", async () => {
-		fetchRatings.mockRejectedValue(new Error("HTTP 503"));
+		fetchRatingsMock.mockRejectedValue(new Error("HTTP 503"));
 		const { a, element } = makeButton();
 
 		await requestPage(element, a);
@@ -118,7 +120,7 @@ describe("ошибки", () => {
 	});
 
 	test("не затирает уже показанный рейтинг", async () => {
-		fetchRatings.mockRejectedValue(new Error("Failed to fetch"));
+		fetchRatingsMock.mockRejectedValue(new Error("Failed to fetch"));
 		const { a, element } = makeButton();
 		element.classList.add(CLASS.static);
 		element.textContent = "КП: 7.5";
@@ -129,7 +131,7 @@ describe("ошибки", () => {
 	});
 
 	test("клик по плашке с ошибкой повторяет запрос", async () => {
-		fetchRatings.mockRejectedValueOnce(new Error("HTTP 503")).mockResolvedValueOnce({ kp: "7.5", imdb: "7.3" });
+		fetchRatingsMock.mockRejectedValueOnce(new Error("HTTP 503")).mockResolvedValueOnce({ kp: "7.5", imdb: "7.3" });
 		const { a, element } = makeBadge();
 
 		await requestPage(element, a);

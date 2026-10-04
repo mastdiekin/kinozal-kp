@@ -20,8 +20,8 @@ describe("wrap", () => {
 		const result = wrap(links[0]);
 
 		expect(result).toBe(links[0]);
-		expect(links[0].parentElement.classList.contains(CLASS.wrapper)).toBe(true);
-		expect(links[0].parentElement.parentElement).toBe(parent);
+		expect(links[0].parentElement!.classList.contains(CLASS.wrapper)).toBe(true);
+		expect(links[0].parentElement!.parentElement).toBe(parent);
 	});
 
 	test("по умолчанию создаёт div", () => {
@@ -29,7 +29,7 @@ describe("wrap", () => {
 
 		wrap(links[0]);
 
-		expect(links[0].parentElement.tagName).toBe("DIV");
+		expect(links[0].parentElement!.tagName).toBe("DIV");
 	});
 
 	test("использует переданную обёртку и добавляет ей класс", () => {

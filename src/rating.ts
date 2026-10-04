@@ -4,12 +4,13 @@ import { createPreloaderElement } from "./dom";
 import { getCachedRating, setCachedRating } from "./cache";
 import { fetchRatings } from "./api";
 
-export async function requestPage(element, a, skipCache = false) {
-	element = element.dataset.url ? element : element.parentElement;
-	const url = element.dataset.url;
+export async function requestPage(source: HTMLElement, a: Element | null | undefined, skipCache = false): Promise<void> {
+	const element = source.dataset.url ? source : source.parentElement;
+	const url = element?.dataset.url;
+	if (!element || !url) return;
 
 	try {
-		// если рейтинг есть в кэше, запрос к сайту не нужен. При reGetRating === True - получаем рейтинг по новому
+		// если рейтинг есть в кэше, запрос к сайту не нужен. При skipCache === true - получаем рейтинг по новому
 		const cached = skipCache ? null : getCachedRating(url);
 		if (cached) {
 			createRatingRender(cached.kp, cached.imdb, element);
@@ -28,14 +29,14 @@ export async function requestPage(element, a, skipCache = false) {
 		console.error("Не удалось получить рейтинг:", err);
 		renderError(element);
 	} finally {
-		element.disabled = false;
+		if (element instanceof HTMLButtonElement) element.disabled = false;
 
 		const preloader = a?.querySelector(`.${CLASS.preloader}`);
 		preloader?.remove();
 	}
 }
 
-function renderError(element) {
+function renderError(element: HTMLElement): void {
 	// если рейтинг уже показан (повторный запрос по кнопке), оставляем его
 	if (element.classList.contains(CLASS.static)) return;
 
@@ -49,19 +50,19 @@ function renderError(element) {
 	}
 }
 
-function retryMainPageBadge(e) {
+function retryMainPageBadge(e: Event): void {
 	e.preventDefault(); // плашка лежит внутри ссылки на раздачу
 	e.stopPropagation();
 
-	const element = e.currentTarget;
+	const element = e.currentTarget as HTMLElement;
 	element.classList.remove(CLASS.error);
 	element.removeAttribute("title");
 	element.replaceChildren(createPreloaderElement());
 
-	requestPage(element, element.parentElement);
+	void requestPage(element, element.parentElement);
 }
 
-function ratingHtmlTemplate(kp, imdb) {
+function ratingHtmlTemplate(kp: string, imdb: string): { template: string; title: string } {
 	return {
 		template: `
 			<span class="final__rating">КП: ${kp}</span>
@@ -71,8 +72,8 @@ function ratingHtmlTemplate(kp, imdb) {
 	};
 }
 
-function createRatingRender(kp_rating, imdb_rating, element) {
-	const t = ratingHtmlTemplate(kp_rating, imdb_rating);
+function createRatingRender(kpRating: string, imdbRating: string, element: HTMLElement): void {
+	const t = ratingHtmlTemplate(kpRating, imdbRating);
 	if (!element.classList.contains(CLASS.static)) element.classList.add(CLASS.static);
 	element.innerHTML = t.template;
 	element.title = t.title;

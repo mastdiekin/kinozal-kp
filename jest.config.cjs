@@ -1,9 +1,9 @@
 module.exports = {
 	testEnvironment: "jsdom",
 	roots: ["<rootDir>/tests"],
-	setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
+	setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
 	moduleNameMapper: {
-		"^\\$$": "<rootDir>/tests/gm-mock.js",
+		"^\\$$": "<rootDir>/tests/gm-mock.ts",
 	},
 	clearMocks: true,
 	restoreMocks: true,

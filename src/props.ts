@@ -7,6 +7,6 @@ export const props = {
 	errorText: "Ошибка. Повторить?", // кнопка в топе: клик перезапускает запрос
 	errorTitle: "Не удалось загрузить рейтинг",
 	unknownRating: "n/a",
-};
+} as const;
 
 export const siteEncoding = "windows-1251";

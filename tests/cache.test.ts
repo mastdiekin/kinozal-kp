@@ -1,11 +1,12 @@
-import { GM_getValue, GM_listValues, GM_setValue, menuCommands } from "$";
+import { GM_getValue, GM_listValues, GM_setValue, menuCommands } from "./gm-mock";
 import { getCachedRating, pruneExpiredCache, registerCacheMenu, setCachedRating } from "../src/cache";
+import type { Ratings } from "../src/types";
 
 const HOUR = 60 * 60 * 1000;
-const url = (id, host = "kinozal.tv") => `https://${host}/details.php?id=${id}`;
-const rating = { kp: "7.5", imdb: "7.3" };
+const url = (id: number, host = "kinozal.tv") => `https://${host}/details.php?id=${id}`;
+const rating: Ratings = { kp: "7.5", imdb: "7.3" };
 
-let now;
+let now: number;
 beforeEach(() => {
 	now = 1_700_000_000_000;
 	jest.spyOn(Date, "now").mockImplementation(() => now);
@@ -104,7 +105,11 @@ describe("pruneExpiredCache", () => {
 });
 
 describe("меню кэша", () => {
-	const command = (part) => menuCommands.find((c) => c.name.includes(part));
+	const command = (part: string) => {
+		const found = menuCommands.find((c) => c.name.includes(part));
+		if (!found) throw new Error(`Нет пункта меню: ${part}`);
+		return found;
+	};
 
 	beforeEach(() => {
 		jest.spyOn(window, "alert").mockImplementation(() => {});

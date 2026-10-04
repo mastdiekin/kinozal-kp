@@ -6,13 +6,13 @@ import { fetchRatings, parseRatings } from "../src/api";
 const detailsPage = readFileSync(join(__dirname, "fixtures", "details.html"), "utf-8");
 
 // заменяет фрагмент и падает, если его в фикстуре не нашлось
-function replaceOnce(html, from, to) {
+function replaceOnce(html: string, from: string, to: string): string {
 	if (!html.includes(from)) throw new Error(`В фикстуре нет фрагмента: ${from}`);
 	return html.replace(from, to);
 }
 
 // убирает строки фикстуры, содержащие фрагмент
-function withoutLine(html, part) {
+function withoutLine(html: string, part: string): string {
 	const lines = html.split("\n");
 	const result = lines.filter((line) => !line.includes(part));
 	if (result.length === lines.length) throw new Error(`В фикстуре нет строки с: ${part}`);
@@ -20,7 +20,7 @@ function withoutLine(html, part) {
 }
 
 // кодирует строку в windows-1251 (кириллица и ASCII, остальное считаем ошибкой теста)
-function toWin1251(str) {
+function toWin1251(str: string): Uint8Array {
 	return Uint8Array.from(str, (ch) => {
 		const c = ch.charCodeAt(0);
 		if (c < 0x80) return c;
@@ -69,7 +69,7 @@ describe("parseRatings на реальной странице раздачи", (
 
 describe("fetchRatings", () => {
 	const url = "https://kinozal.tv/details.php?id=2147441";
-	const response = (body, init = {}) => ({
+	const response = (body: string, init: { ok?: boolean; status?: number } = {}) => ({
 		ok: true,
 		status: 200,
 		arrayBuffer: async () => toWin1251(body).buffer,
@@ -77,21 +77,21 @@ describe("fetchRatings", () => {
 	});
 
 	test("декодирует windows-1251 и возвращает рейтинги", async () => {
-		global.fetch = jest.fn().mockResolvedValue(response(detailsPage));
+		globalThis.fetch = jest.fn().mockResolvedValue(response(detailsPage));
 
 		await expect(fetchRatings(url)).resolves.toEqual({ kp: "7.7", imdb: "6.9" });
-		expect(global.fetch).toHaveBeenCalledWith(url, { credentials: "include" });
+		expect(globalThis.fetch).toHaveBeenCalledWith(url, { credentials: "include" });
 	});
 
 	test("при HTTP-ошибке бросает исключение", async () => {
 		jest.spyOn(console, "error").mockImplementation(() => {});
-		global.fetch = jest.fn().mockResolvedValue(response("Сервис недоступен", { ok: false, status: 503 }));
+		globalThis.fetch = jest.fn().mockResolvedValue(response("Сервис недоступен", { ok: false, status: 503 }));
 
 		await expect(fetchRatings(url)).rejects.toThrow("HTTP 503");
 	});
 
 	test("пробрасывает сетевую ошибку", async () => {
-		global.fetch = jest.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+		globalThis.fetch = jest.fn().mockRejectedValue(new TypeError("Failed to fetch"));
 
 		await expect(fetchRatings(url)).rejects.toThrow("Failed to fetch");
 	});
