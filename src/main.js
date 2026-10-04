@@ -1,35 +1,11 @@
-// ==UserScript==
-// @name               Рейтинг кинопоиска для kinozal.tv
-// @namespace          https://github.com/mastdiekin/kinozal-kp
-// @description        Добавляет кнопку рейтинга, на главной странице и на странице топа http://kinozal.tv/top.php к раздачам.
-
-// @match              *kinozal.tv/*
-// @match              *kinozal-tv.appspot.com/*
-// @match              *kinozal.me/*
-// @match              *kinozal.guru/*
-
-// @version            1.1.0
-// @author             mastdiekin
-// @icon               https://www.google.com/s2/favicons?sz=64&domain=kinozal.guru
-
-// @grant              GM_registerMenuCommand
-// @grant              GM_listValues
-// @grant              GM_deleteValue
-// @grant              GM_getValue
-// @grant              GM_setValue
-// @grant              GM_addStyle
-
-// @license MIT
-
-// ==/UserScript==
-
-/*=======================================================
-  Repository
-=======================================================
-
-  https://github.com/mastdiekin/kinozal-kp
-
-*/
+import {
+	GM_addStyle,
+	GM_deleteValue,
+	GM_getValue,
+	GM_listValues,
+	GM_registerMenuCommand,
+	GM_setValue,
+} from "$";
 
 const showMainPageRatingEnable = GM_getValue("showMainPageRating", true); //показывает рейтинг у раздач на главной сайта
 const showTopPageRatingEnable = GM_getValue("showTopPageRating", true); //добавляет кнопку "Рейтинг" в топе раздач (http://kinozal.tv/top.php)
