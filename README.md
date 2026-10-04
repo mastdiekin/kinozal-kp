@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/mastdiekin/kinozal-kp">
-    <img src="https://github.com/mastdiekin/kinozal-kp/blob/master/preview.gif" alt="" width="657" height="350">
+    <img src="https://github.com/mastdiekin/kinozal-kp/blob/master/src/assets/preview.gif" alt="" width="657" height="350">
   </a>
 </p>
 
