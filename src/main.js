@@ -1,5 +1,5 @@
 import { GM_addStyle } from "$";
-import { styles, disabledStyles } from "./styles"
+import { styles, disabledStyles } from "./styles";
 import { pruneExpiredCache, registerCacheMenu } from "./cache";
 import { initMainPageRatings } from "./mainpage";
 import { initTopPageButtons } from "./top";
@@ -28,11 +28,11 @@ import { registerToggles, showMainPageRatingEnable, showTopPageRatingEnable } fr
 
 	// Очистка просроченных записей
 	pruneExpiredCache();
-	
+
 	if (showTopPageRatingEnable) {
 		initTopPageButtons();
 	}
-	
+
 	if (showMainPageRatingEnable) {
 		initMainPageRatings();
 	}

@@ -1,10 +1,4 @@
-import {
-	GM_deleteValue,
-	GM_getValue,
-	GM_listValues,
-	GM_registerMenuCommand,
-	GM_setValue,
-} from "$";
+import { GM_deleteValue, GM_getValue, GM_listValues, GM_registerMenuCommand, GM_setValue } from "$";
 
 const DEFAULT_CACHE_TTL_HOURS = 24; //время хранения рейтинга в кэше по умолчанию
 const CACHE_PREFIX = "rating:"; //префикс ключей кэша, по нему отличаем кэш от настроек
@@ -57,10 +51,7 @@ export function pruneExpiredCache() {
 // пункты меню Tampermonkey для управления кэшем
 export function registerCacheMenu() {
 	GM_registerMenuCommand(`Время кэша рейтингов: ${getCacheTtlHours()} ч`, () => {
-		const input = prompt(
-			"Сколько часов хранить рейтинги в кэше? (0 — не кэшировать)",
-			getCacheTtlHours()
-		);
+		const input = prompt("Сколько часов хранить рейтинги в кэше? (0 — не кэшировать)", getCacheTtlHours());
 		if (input === null) return; // нажали отмену
 
 		const hours = parseFloat(input.replace(",", "."));

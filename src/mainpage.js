@@ -17,10 +17,7 @@ function createMainPageRatingsElement() {
 		if (!parts) return; // нестандартная карточка, пропускаем
 
 		const { a, img } = parts;
-		img.insertAdjacentHTML(
-			"afterend",
-			`<div class='${CLASS.ratingDiv}'><div class='${CLASS.preloader}'>${svg}</div></div>`
-		);
+		img.insertAdjacentHTML("afterend", `<div class='${CLASS.ratingDiv}'><div class='${CLASS.preloader}'>${svg}</div></div>`);
 		img.nextElementSibling.dataset.url = a.href;
 	});
 }
@@ -45,7 +42,7 @@ function mainPageRatings() {
 		},
 		{
 			rootMargin: "0px 0px 200px 0px",
-		}
+		},
 	);
 
 	tpBody.forEach((el) => {
