@@ -10,7 +10,7 @@
 
 ## Как использовать?
 
-Установить kinozal_kp.user.js в [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
+Установить [kinozal_kp.user.js](https://github.com/mastdiekin/kinozal-kp/releases/latest/download/kinozal_kp.user.js) в [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=ru)
 
 ### Обновления
 
