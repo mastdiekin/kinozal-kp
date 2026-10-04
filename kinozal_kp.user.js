@@ -480,16 +480,24 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
 	// Рейтинги на главной странице
 	// -----------------------------------------------------
 
+	// возвращает ссылку и картинку карточки, либо null, если вёрстка другая
+	function getCardParts(el) {
+		const a = el.children[0];
+		const img = a?.children[0];
+		return a && img ? { a, img } : null;
+	}
+
 	function createMainPageRatingsElement() {
-		tpBody.map((el) => {
-			const a = el.children[0];
-			const img = a.children[0];
+		tpBody.forEach((el) => {
+			const parts = getCardParts(el);
+			if (!parts) return; // нестандартная карточка, пропускаем
+
+			const { a, img } = parts;
 			img.insertAdjacentHTML(
 				"afterend",
 				`<div class='${CLASS.ratingDiv}'><div class='${CLASS.preloader}'>${svg}</div></div>`
 			);
-			const div = a.children[1];
-			div.dataset.url = a.href;
+			img.nextElementSibling.dataset.url = a.href;
 		});
 	}
 
@@ -500,14 +508,15 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
                 entries.forEach((entry) => {
                     if (!entry.isIntersecting && entry.boundingClientRect.top >= 0) return;
 
-                    const self = entry.target;
-                    obs.unobserve(self);
+					const self = entry.target;
+					obs.unobserve(self);
 
-                    const a = self.children[0];
-                    const element = a.children[1];
+					const a = self.children[0];
+					const element = a?.querySelector(`.${CLASS.ratingDiv}`);
+					if (!element) return; // для этой карточки плашка не создана
 
                     requestPage(element, a);
-                    self.classList.add("__init");
+					self.classList.add("__init");
                 });
             },
             {
@@ -515,10 +524,13 @@ const PRUNE_INTERVAL = 24 * 60 * 60 * 1000; //как часто чистить �
             }
         );
 
-        tpBody.forEach((el) => {
-            el.children[0].classList.add("tp1_a");
-            observer.observe(el);
-        });
+		tpBody.forEach((el) => {
+			const a = el.children[0];
+			if (!a?.querySelector(`.${CLASS.ratingDiv}`)) return; // пропускаем карточки без плашки
+
+			a.classList.add("tp1_a");
+			observer.observe(el);
+		});
     }
 
 	//INIT
