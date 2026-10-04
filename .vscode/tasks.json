@@ -86,6 +86,42 @@
 		},
 
 		{
+			"label": "Eslint",
+			"type": "npm",
+			"script": "lint",
+			"isBackground": false,
+			"icon": {
+				"id": "debug"
+			},
+			"presentation": {
+				"panel": "shared",
+				"group": "dev-group",
+				"echo": true,
+				"focus": false,
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+
+		{
+			"label": "Eslint fix",
+			"type": "npm",
+			"script": "lint:fix",
+			"isBackground": false,
+			"icon": {
+				"id": "debug"
+			},
+			"presentation": {
+				"panel": "shared",
+				"group": "dev-group",
+				"echo": true,
+				"focus": false,
+				"reveal": "always"
+			},
+			"problemMatcher": []
+		},
+
+		{
 			"label": "Build",
 			"type": "npm",
 			"script": "build",

@@ -3,7 +3,7 @@ import { props, siteEncoding } from "./props";
 import type { Ratings } from "./types";
 
 function createRating(str: string): string {
-	const regex = /(\*|\d+(\.\d+){0,2}(\.\*)?)(\<)/gm;
+	const regex = /(\*|\d+(\.\d+){0,2}(\.\*)?)(<)/gm;
 	let m: RegExpExecArray | null;
 	const arr: RegExpExecArray[] = [];
 	while ((m = regex.exec(str)) !== null) {
@@ -30,7 +30,7 @@ export function parseRatings(text: string): Ratings {
 	for (let i = 1; i < items.length; ++i) {
 		items[i].className += " id-" + i;
 		const kpSearch = items[i].innerHTML.match(/Кинопоиск|IMDb/m);
-		kpSearch && arr.push(kpSearch);
+		if (kpSearch) arr.push(kpSearch);
 	}
 
 	const kpMatch = arr.find((m) => m[0] === "Кинопоиск");

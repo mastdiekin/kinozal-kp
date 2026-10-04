@@ -9,7 +9,7 @@ function cacheKey(url: string): string {
 	try {
 		const id = new URL(url).searchParams.get("id");
 		return CACHE_PREFIX + (id || url);
-	} catch (e) {
+	} catch {
 		return CACHE_PREFIX + url;
 	}
 }
