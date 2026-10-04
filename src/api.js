@@ -1,5 +1,5 @@
 import { SELECTOR } from "./styles";
-import { siteEncoding } from "./props";
+import { props, siteEncoding } from "./props";
 
 function createRating(str) {
 	const regex = /(\*|\d+(\.\d+){0,2}(\.\*)?)(\<)/gm;
@@ -35,8 +35,8 @@ function parseRatings(text) {
 	let kp_matches = arr.filter((value) => /^Кинопоиск/.test(value));
 	let imdb_matches = arr.filter((value) => /^IMDb/.test(value));
 
-	const imdb = imdb_matches[0] ? createRating(imdb_matches[0].input) : "n/a";
-	const kp = kp_matches[0] ? createRating(kp_matches[0].input) : "n/a";
+	const imdb = imdb_matches[0] ? createRating(imdb_matches[0].input) : props.unknownRating;
+	const kp = kp_matches[0] ? createRating(kp_matches[0].input) : props.unknownRating;
 
 	return { kp, imdb };
 }

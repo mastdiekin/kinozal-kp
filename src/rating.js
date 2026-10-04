@@ -19,7 +19,7 @@ export async function requestPage(element, a, skipCache = false) {
 		const { kp, imdb } = await fetchRatings(url);
 
 		// сохраняем в кэш, только если нашёлся хотя бы один рейтинг
-		if (kp !== "n/a" || imdb !== "n/a") {
+		if (kp !== props.unknownRating || imdb !== props.unknownRating) {
 			setCachedRating(url, { kp, imdb });
 		}
 
