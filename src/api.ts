@@ -12,7 +12,7 @@ function isCloudflareChallenge(response: Response, text: string): boolean {
 	return CF_CHALLENGE_RE.test(text);
 }
 
-function createRating(str: string): string {
+function _createRating(str: string): string {
 	const regex = /(\*|\d+(\.\d+){0,2}(\.\*)?)(<)/gm;
 	let m: RegExpExecArray | null;
 	const arr: RegExpExecArray[] = [];
@@ -46,14 +46,14 @@ export function parseRatings(text: string): Ratings {
 	const kpMatch = arr.find((m) => m[0] === "Кинопоиск");
 	const imdbMatch = arr.find((m) => m[0] === "IMDb");
 
-	const imdb = imdbMatch ? createRating(imdbMatch.input ?? "") : props.unknownRating;
-	const kp = kpMatch ? createRating(kpMatch.input ?? "") : props.unknownRating;
+	const imdb = imdbMatch ? _createRating(imdbMatch.input ?? "") : props.unknownRating;
+	const kp = kpMatch ? _createRating(kpMatch.input ?? "") : props.unknownRating;
 
 	return { kp, imdb };
 }
 
 // загружает страницу раздачи и возвращает { kp, imdb }, при ошибке бросает исключение
-export async function fetchRatings(url: string): Promise<Ratings> {
+export async function fetchRatings(url: string): Promise<string> {
 	const response = await fetch(url, {
 		credentials: "include",
 	});
@@ -71,5 +71,5 @@ export async function fetchRatings(url: string): Promise<Ratings> {
 		throw new Error(`HTTP ${response.status}`);
 	}
 
-	return parseRatings(text);
+	return text;
 }

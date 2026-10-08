@@ -1,7 +1,7 @@
 import { CLASS, SELECTOR } from "./styles";
 import { props } from "./props";
 import { createPreloaderElement, wrap } from "./dom";
-import { requestPage } from "./rating";
+import { loadAndRenderRating } from "./rating";
 import { reGetRating } from "./toggle";
 
 function createButton(a: HTMLAnchorElement): void {
@@ -17,7 +17,7 @@ function createButton(a: HTMLAnchorElement): void {
 			//отключаем кнопку
 			button.disabled = true;
 			a.appendChild(createPreloaderElement());
-			return requestPage(button, a, skipCache);
+			return loadAndRenderRating(button, a, skipCache);
 		}
 	});
 }

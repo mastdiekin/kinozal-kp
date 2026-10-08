@@ -81,10 +81,13 @@ describe("fetchRatings", () => {
 		...init,
 	});
 
-	test("декодирует windows-1251 и возвращает рейтинги", async () => {
+	test("декодирует windows-1251 и возвращает страницу, из которой парсятся рейтинги", async () => {
 		globalThis.fetch = jest.fn().mockResolvedValue(response(detailsPage));
 
-		await expect(fetchRatings(url)).resolves.toEqual({ kp: "7.7", imdb: "6.9" });
+		const page = await fetchRatings(url);
+
+		expect(page).toBe(detailsPage);
+		expect(parseRatings(page)).toEqual({ kp: "7.7", imdb: "6.9" });
 		expect(globalThis.fetch).toHaveBeenCalledWith(url, { credentials: "include" });
 	});
 
@@ -133,7 +136,9 @@ describe("fetchRatings", () => {
 		test("заголовок cf-mitigated с другим значением не считается челленджем", async () => {
 			globalThis.fetch = jest.fn().mockResolvedValue(response(detailsPage, { headers: { "cf-mitigated": "other" } }));
 
-			await expect(fetchRatings(url)).resolves.toEqual({ kp: "7.7", imdb: "6.9" });
+			const page = await fetchRatings(url);
+
+			expect(parseRatings(page)).toEqual({ kp: "7.7", imdb: "6.9" });
 		});
 
 		test("обычная HTTP-ошибка без признаков челленджа не превращается в CloudflareChallengeError", async () => {

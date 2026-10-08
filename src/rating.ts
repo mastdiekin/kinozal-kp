@@ -2,38 +2,36 @@ import { CLASS } from "./styles";
 import { props } from "./props";
 import { createPreloaderElement } from "./dom";
 import { getCachedRating, setCachedRating } from "./cache";
-import { fetchRatings } from "./api";
+import { fetchRatings, parseRatings } from "./api";
 import { CloudflareChallengeError } from "./errors";
+import { Ratings } from "./types";
 
-export async function requestPage(source: HTMLElement, a: Element | null | undefined, skipCache = false): Promise<void> {
+export async function getRatings(url: string, skipCache: boolean): Promise<Ratings> {
+	const cached = skipCache ? null : getCachedRating(url);
+	if (cached) return cached;
+
+	const { kp, imdb } = parseRatings(await fetchRatings(url));
+
+	if (kp !== props.unknownRating || imdb !== props.unknownRating) {
+		setCachedRating(url, { kp, imdb });
+	}
+	return { kp, imdb };
+}
+
+export async function loadAndRenderRating(source: HTMLElement, a: Element | null | undefined, skipCache = false): Promise<void> {
 	const element = source.dataset.url ? source : source.parentElement;
 	const url = element?.dataset.url;
 	if (!element || !url) return;
 
 	try {
-		// если рейтинг есть в кэше, запрос к сайту не нужен. При skipCache === true - получаем рейтинг по новому
-		const cached = skipCache ? null : getCachedRating(url);
-		if (cached) {
-			createRatingRender(cached.kp, cached.imdb, element);
-			return;
-		}
-
-		const { kp, imdb } = await fetchRatings(url);
-
-		// сохраняем в кэш, только если нашёлся хотя бы один рейтинг
-		if (kp !== props.unknownRating || imdb !== props.unknownRating) {
-			setCachedRating(url, { kp, imdb });
-		}
-
+		const { kp, imdb } = await getRatings(url, skipCache);
 		createRatingRender(kp, imdb, element);
 	} catch (err) {
 		console.error("Не удалось получить рейтинг:", err);
 		renderError(element, err);
 	} finally {
 		if (element instanceof HTMLButtonElement) element.disabled = false;
-
-		const preloader = a?.querySelector(`.${CLASS.preloader}`);
-		preloader?.remove();
+		a?.querySelector(`.${CLASS.preloader}`)?.remove();
 	}
 }
 
@@ -79,7 +77,7 @@ function renderCloudflareError(element: HTMLElement, url: string): void {
 					element.classList.remove(CLASS.error);
 					element.removeAttribute("title");
 					element.replaceChildren(createPreloaderElement());
-					void requestPage(element, element.parentElement, true);
+					void loadAndRenderRating(element, element.parentElement, true);
 				},
 				{ once: true },
 			);
@@ -97,7 +95,7 @@ function retryMainPageBadge(e: Event): void {
 	element.removeAttribute("title");
 	element.replaceChildren(createPreloaderElement());
 
-	void requestPage(element, element.parentElement);
+	void loadAndRenderRating(element, element.parentElement);
 }
 
 function ratingHtmlTemplate(kp: string, imdb: string): { template: string; title: string } {

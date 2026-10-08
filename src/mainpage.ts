@@ -1,5 +1,5 @@
 import { CLASS, SELECTOR, svg } from "./styles";
-import { requestPage } from "./rating";
+import { loadAndRenderRating } from "./rating";
 
 // снимок карточек делается при загрузке модуля, до любых изменений DOM
 const tpBody = [...document.querySelectorAll<HTMLElement>(SELECTOR.topPageBody)];
@@ -41,7 +41,7 @@ function mainPageRatings(): void {
 				const element = a?.querySelector<HTMLElement>(`.${CLASS.ratingDiv}`);
 				if (!element) return; // для этой карточки плашка не создана
 
-				void requestPage(element, a);
+				void loadAndRenderRating(element, a);
 				self.classList.add("__init");
 			});
 		},
