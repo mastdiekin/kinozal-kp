@@ -5,11 +5,9 @@ import { fetchRatings, parseRatings } from "../src/api";
 import { getRatings, loadAndRenderRating } from "../src/rating";
 
 jest.mock("../src/api", () => ({ fetchRatings: jest.fn(), parseRatings: jest.fn() }));
-jest.mock("../src/cache", () => ({ getCachedRating: jest.fn(), setCachedRating: jest.fn() }));
 
 const fetchRatingsMock = fetchRatings as jest.MockedFunction<typeof fetchRatings>;
 const parseRatingsMock = parseRatings as jest.MockedFunction<typeof parseRatings>;
-const getCachedRatingMock = getCachedRating as jest.MockedFunction<typeof getCachedRating>;
 
 const URL = "https://kinozal.guru/details.php?id=2128508";
 
@@ -43,13 +41,14 @@ function makeButton() {
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 beforeEach(() => {
-	jest.resetAllMocks(); // clearAllMocks не сбрасывает mockResolvedValue между тестами
+	jest.resetAllMocks();
+	localStorage.clear();
 	jest.spyOn(console, "error").mockImplementation(() => {});
 });
 
 describe("getRatings", () => {
 	test("берёт рейтинг из кэша и не обращается к сайту", async () => {
-		getCachedRatingMock.mockReturnValue({ kp: "8.1", imdb: "7.9" });
+		setCachedRating(URL, { kp: "8.1", imdb: "7.9" });
 
 		const result = await getRatings(URL, false);
 
@@ -62,28 +61,40 @@ describe("getRatings", () => {
 
 		const result = await getRatings(URL, false);
 
+		expect(fetchRatings).toHaveBeenCalledTimes(1);
 		expect(fetchRatings).toHaveBeenCalledWith(URL);
 		expect(result).toEqual({ kp: "7.5", imdb: "7.3" });
-		expect(setCachedRating).toHaveBeenCalledWith(URL, { kp: "7.5", imdb: "7.3" });
+		expect(getCachedRating(URL)).toEqual({ kp: "7.5", imdb: "7.3" });
+	});
+
+	test("второй вызов берёт результат из кэша, а не из сети", async () => {
+		mockSite("7.5", "7.3");
+
+		await getRatings(URL, false);
+		const second = await getRatings(URL, false);
+
+		expect(fetchRatings).toHaveBeenCalledTimes(1);
+		expect(second).toEqual({ kp: "7.5", imdb: "7.3" });
 	});
 
 	test("skipCache игнорирует кэш и обновляет его", async () => {
-		getCachedRatingMock.mockReturnValue({ kp: "1.0", imdb: "1.0" });
+		setCachedRating(URL, { kp: "1.0", imdb: "1.0" });
 		mockSite("7.5", "7.3");
 
 		const result = await getRatings(URL, true);
 
-		expect(getCachedRating).not.toHaveBeenCalled();
+		expect(fetchRatings).toHaveBeenCalledTimes(1);
 		expect(result).toEqual({ kp: "7.5", imdb: "7.3" });
-		expect(setCachedRating).toHaveBeenCalledWith(URL, { kp: "7.5", imdb: "7.3" });
+		expect(getCachedRating(URL)).toEqual({ kp: "7.5", imdb: "7.3" });
 	});
 
 	test("не кэширует результат, где нет ни одного рейтинга", async () => {
 		mockSite(props.unknownRating, props.unknownRating);
 
-		await getRatings(URL, false);
+		const result = await getRatings(URL, false);
 
-		expect(setCachedRating).not.toHaveBeenCalled();
+		expect(result).toEqual({ kp: props.unknownRating, imdb: props.unknownRating });
+		expect(getCachedRating(URL)).toBeNull();
 	});
 
 	test("кэширует результат, если найден хотя бы один рейтинг", async () => {
@@ -91,14 +102,14 @@ describe("getRatings", () => {
 
 		await getRatings(URL, false);
 
-		expect(setCachedRating).toHaveBeenCalledWith(URL, { kp: "7.5", imdb: props.unknownRating });
+		expect(getCachedRating(URL)).toEqual({ kp: "7.5", imdb: props.unknownRating });
 	});
 
 	test("пробрасывает ошибку сети и ничего не кэширует", async () => {
 		fetchRatingsMock.mockRejectedValue(new Error("HTTP 503"));
 
 		await expect(getRatings(URL, false)).rejects.toThrow("HTTP 503");
-		expect(setCachedRating).not.toHaveBeenCalled();
+		expect(getCachedRating(URL)).toBeNull();
 	});
 });
 
@@ -116,24 +127,25 @@ describe("loadAndRenderRating", () => {
 		expect(element.classList.contains(CLASS.static)).toBe(true);
 	});
 
-	test("skipCache пропускает чтение кэша", async () => {
-		mockSite("7.5", "7.3");
-		const { a, element } = makeButton();
-
-		await loadAndRenderRating(element, a, true);
-
-		expect(getCachedRating).not.toHaveBeenCalled();
-		expect(element.textContent).toContain("КП: 7.5");
-	});
-
 	test("показывает рейтинг из кэша без запроса к сайту", async () => {
-		getCachedRatingMock.mockReturnValue({ kp: "8.1", imdb: "7.9" });
+		setCachedRating(URL, { kp: "8.1", imdb: "7.9" });
 		const { a, element } = makeBadge();
 
 		await loadAndRenderRating(element, a);
 
 		expect(fetchRatings).not.toHaveBeenCalled();
 		expect(element.textContent).toContain("КП: 8.1");
+	});
+
+	test("skipCache игнорирует кэш и показывает свежий рейтинг", async () => {
+		setCachedRating(URL, { kp: "1.0", imdb: "1.0" });
+		mockSite("7.5", "7.3");
+		const { a, element } = makeButton();
+
+		await loadAndRenderRating(element, a, true);
+
+		expect(fetchRatings).toHaveBeenCalledTimes(1);
+		expect(element.textContent).toContain("КП: 7.5");
 	});
 
 	test("убирает прелоадер и снимает disabled с кнопки", async () => {
@@ -167,6 +179,7 @@ describe("ошибки", () => {
 		expect(element.textContent).toBe(props.errorText);
 		expect(element.title).toBe(props.errorTitle);
 		expect(element.classList.contains(CLASS.error)).toBe(true);
+		expect(getCachedRating(URL)).toBeNull();
 	});
 
 	test("на кнопке в топе показывает ошибку без класса кликабельной плашки", async () => {
