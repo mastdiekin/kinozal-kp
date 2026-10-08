@@ -3,6 +3,7 @@ import { props } from "./props";
 import { createPreloaderElement } from "./dom";
 import { getCachedRating, setCachedRating } from "./cache";
 import { fetchRatings } from "./api";
+import { CloudflareChallengeError } from "./errors";
 
 export async function requestPage(source: HTMLElement, a: Element | null | undefined, skipCache = false): Promise<void> {
 	const element = source.dataset.url ? source : source.parentElement;
@@ -27,7 +28,7 @@ export async function requestPage(source: HTMLElement, a: Element | null | undef
 		createRatingRender(kp, imdb, element);
 	} catch (err) {
 		console.error("Не удалось получить рейтинг:", err);
-		renderError(element);
+		renderError(element, err);
 	} finally {
 		if (element instanceof HTMLButtonElement) element.disabled = false;
 
@@ -36,9 +37,14 @@ export async function requestPage(source: HTMLElement, a: Element | null | undef
 	}
 }
 
-function renderError(element: HTMLElement): void {
+function renderError(element: HTMLElement, err?: unknown): void {
 	// если рейтинг уже показан (повторный запрос по кнопке), оставляем его
 	if (element.classList.contains(CLASS.static)) return;
+
+	if (err instanceof CloudflareChallengeError) {
+		renderCloudflareError(element, err.url);
+		return;
+	}
 
 	element.textContent = props.errorText;
 	element.title = props.errorTitle;
@@ -48,6 +54,38 @@ function renderError(element: HTMLElement): void {
 		element.classList.add(CLASS.error);
 		element.addEventListener("click", retryMainPageBadge, { once: true });
 	}
+}
+
+function renderCloudflareError(element: HTMLElement, url: string): void {
+	element.textContent = props.cloudflareText;
+	element.title = props.cloudflareTitle;
+
+	if (!element.classList.contains(CLASS.ratingDiv)) return;
+
+	element.classList.add(CLASS.error);
+
+	element.addEventListener(
+		"click",
+		(e: Event) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			window.open(url, "_blank", "noopener");
+
+			// когда пользователь вернётся на вкладку - повторяем запрос
+			window.addEventListener(
+				"focus",
+				() => {
+					element.classList.remove(CLASS.error);
+					element.removeAttribute("title");
+					element.replaceChildren(createPreloaderElement());
+					void requestPage(element, element.parentElement, true);
+				},
+				{ once: true },
+			);
+		},
+		{ once: true },
+	);
 }
 
 function retryMainPageBadge(e: Event): void {

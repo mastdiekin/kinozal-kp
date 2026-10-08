@@ -5,6 +5,8 @@ export const props = {
 	buttonText: "Рейтинг",
 	requestText: "Получить рейтинг",
 	errorText: "Ошибка. Повторить?", // кнопка в топе: клик перезапускает запрос
+	cloudflareText: "Проверка Cloudflare. Пройти?",
+	cloudflareTitle: "Сайт запросил проверку Cloudflare. Клик откроет страницу, после проверки вернитесь сюда",
 	errorTitle: "Не удалось загрузить рейтинг",
 	unknownRating: "n/a",
 } as const;
